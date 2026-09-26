@@ -22,7 +22,8 @@ export function isSpecificDependentAge(age: number): boolean {
  * それ以外の年齢は従来通り130万円のまま。
  */
 export function getWalls(profile: DependencyProfile): WallDefinition[] {
-  const isSpecificDependent = isSpecificDependentAge(profile.currentAge);
+  // currentAge追加前のlocalStorageデータにはこのフィールドが無くundefinedになりうるためfallbackする
+  const isSpecificDependent = isSpecificDependentAge(profile.currentAge ?? 19);
   const walls: WallDefinition[] = [
     {
       key: "incomeTax",
@@ -55,11 +56,15 @@ export function monthlyWageIncome(job: Job): number {
  */
 export function monthlyIncomeForWall(job: Job, wallKey: WallDefinition["key"]): number {
   const wage = monthlyWageIncome(job);
-  return wallKey === "socialInsurance" ? wage + job.monthlyCommutingAllowance : wage;
+  // ??で明示的にfallbackするのは、endMonth追加前にlocalStorageへ保存された古いJobデータには
+  // このフィールド自体が存在せず(undefined)、nullとの===比較だけでは救えないため
+  const commutingAllowance = job.monthlyCommutingAllowance ?? 0;
+  return wallKey === "socialInsurance" ? wage + commutingAllowance : wage;
 }
 
 function isJobActiveInMonth(job: Job, month: number): boolean {
-  return job.startMonth <= month && (job.endMonth === null || month <= job.endMonth);
+  const endMonth = job.endMonth ?? null;
+  return job.startMonth <= month && (endMonth === null || month <= endMonth);
 }
 
 export function totalMonthlyIncomeForWall(
