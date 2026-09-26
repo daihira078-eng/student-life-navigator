@@ -15,17 +15,17 @@ import { formatYen } from "@/lib/format";
 import type { EconomicZoneInput } from "@/lib/types";
 
 const DEFAULT_INPUT: EconomicZoneInput = {
-  usesRakutenCard: false,
+  currentCard: "yucho",
   monthlyCardSpend: 50000,
-  usesRakutenNisa: false,
+  currentNisaBroker: "yucho",
   nisaBalance: 48000,
-  usesRakutenMobile: false,
+  currentTelecom: "docomo",
   currentTelecomMonthlyFee: null,
-  usesRakutenBank: true,
+  currentBank: "rakuten",
   fixedCosts: [
-    { id: "cost-netflix", name: "Netflix", monthlyAmount: 1590 },
-    { id: "cost-prime", name: "Amazon Prime", monthlyAmount: 500 },
-    { id: "cost-claude", name: "Claude Pro", monthlyAmount: 3000 },
+    { id: "cost-netflix", name: "Netflix（スタンダード）", monthlyAmount: 1590 },
+    { id: "cost-prime", name: "Amazon Prime（通常）", monthlyAmount: 500 },
+    { id: "cost-claude", name: "Claude Pro（個人）", monthlyAmount: 3000 },
   ],
 };
 
@@ -50,12 +50,12 @@ export default function EconomicZonePage() {
           経済圏・固定費最適化診断
         </h1>
         <p className="mt-1 text-sm text-secondary">
-          現在契約中の銀行・カード・通信・NISAを入力すると、乗り換えた場合の年間差額の目安を診断します。入力内容はブラウザ内だけで計算され、サーバーには送信されません。
+          現在契約中の銀行・カード・通信・NISAを入力すると、開発者が実際に乗り換えた楽天経済圏との年間差額を試算します。他の選択肢（PayPayカード等）は含まれておらず、万人への「推奨」ではなく個人的な比較の記録です。入力内容はブラウザ内だけで計算され、サーバーには送信されません。
         </p>
       </div>
 
       <div className="rounded-lg border border-(--border-hairline) bg-surface p-4">
-        <div className="text-xs text-muted">年間の節約ポテンシャル（合計）</div>
+        <div className="text-xs text-muted">年間の差額（合計、データがある項目のみ）</div>
         <div className="mt-1 text-3xl font-semibold text-status-good">
           {formatYen(totalSaving)}
         </div>

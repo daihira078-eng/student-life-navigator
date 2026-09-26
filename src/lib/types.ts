@@ -48,14 +48,26 @@ export interface FixedCost {
   monthlyAmount: number;
 }
 
+export type CardOption =
+  | "yucho"
+  | "juroku_debit"
+  | "rakuten"
+  | "paypay"
+  | "dcard"
+  | "mitsui_sumitomo_nl"
+  | "other";
+export type BankOption = "yucho_juroku" | "rakuten" | "other";
+export type TelecomOption = "docomo" | "au" | "softbank" | "rakuten_mobile" | "other";
+export type NisaBrokerOption = "yucho" | "rakuten" | "sbi" | "other";
+
 export interface EconomicZoneInput {
-  usesRakutenCard: boolean;
+  currentCard: CardOption;
   monthlyCardSpend: number;
-  usesRakutenNisa: boolean;
+  currentNisaBroker: NisaBrokerOption;
   nisaBalance: number;
-  usesRakutenMobile: boolean;
+  currentTelecom: TelecomOption;
   currentTelecomMonthlyFee: number | null; // 不明なら null
-  usesRakutenBank: boolean;
+  currentBank: BankOption;
   fixedCosts: FixedCost[];
 }
 
@@ -63,8 +75,8 @@ export interface DiagnosisResult {
   category: "card" | "nisa" | "telecom" | "bank";
   label: string;
   currentLabel: string;
-  recommendedLabel: string;
-  annualDiff: number | null; // nullは試算不可(定性コメントのみ)
+  compareLabel: string; // 「開発者が実際に乗り換えた先」との比較。万人への推奨ではない
+  annualDiff: number | null; // nullは試算不可(データなし、または定性コメントのみ)
   note: string;
   sourceNote: string;
 }

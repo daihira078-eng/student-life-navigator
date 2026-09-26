@@ -16,7 +16,7 @@ export function DiagnosisCard({ result }: { result: DiagnosisResult }) {
               background: "color-mix(in oklab, var(--status-good) 18%, transparent)",
             }}
           >
-            年間 +{formatYen(result.annualDiff!)}の余地
+            年間 {formatYen(result.annualDiff!)}の差
           </span>
         )}
       </div>
@@ -27,8 +27,8 @@ export function DiagnosisCard({ result }: { result: DiagnosisResult }) {
           <div className="font-medium text-primary">{result.currentLabel}</div>
         </div>
         <div>
-          <div className="text-xs text-muted">推奨</div>
-          <div className="font-medium text-primary">{result.recommendedLabel}</div>
+          <div className="text-xs text-muted">比較先（開発者が実際に選んだ先）</div>
+          <div className="font-medium text-primary">{result.compareLabel}</div>
         </div>
       </div>
 
