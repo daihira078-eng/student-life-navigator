@@ -9,6 +9,7 @@ import { IncomeChart, type IncomeSeries } from "@/components/simulator/IncomeCha
 import { ScenarioForm } from "@/components/simulator/ScenarioForm";
 import { ScenarioComparisonTable } from "@/components/simulator/ScenarioComparisonTable";
 import { cumulativeByMonth, evaluateWalls, getWalls } from "@/lib/wallCalculator";
+import { useLocalStorageState } from "@/lib/useLocalStorageState";
 import type { DependencyProfile, Job, Scenario } from "@/lib/types";
 
 const DEFAULT_JOBS: Job[] = [
@@ -53,9 +54,15 @@ const SCENARIO_COLORS = ["var(--series-1)", "var(--series-2)", "var(--series-3)"
 let scenarioCounter = 1;
 
 export default function SimulatorPage() {
-  const [jobs, setJobs] = useState<Job[]>(DEFAULT_JOBS);
-  const [profile, setProfile] = useState<DependencyProfile>(DEFAULT_PROFILE);
-  const [extraScenarios, setExtraScenarios] = useState<Scenario[]>([]);
+  const [jobs, setJobs] = useLocalStorageState<Job[]>("simulator:jobs", DEFAULT_JOBS);
+  const [profile, setProfile] = useLocalStorageState<DependencyProfile>(
+    "simulator:profile",
+    DEFAULT_PROFILE,
+  );
+  const [extraScenarios, setExtraScenarios] = useLocalStorageState<Scenario[]>(
+    "simulator:extraScenarios",
+    [],
+  );
 
   const walls = useMemo(() => evaluateWalls(jobs, profile), [jobs, profile]);
   const series: IncomeSeries[] = useMemo(
@@ -114,17 +121,33 @@ export default function SimulatorPage() {
     setExtraScenarios(extraScenarios.filter((s) => s.id !== id));
   }
 
+  function resetToDefaults() {
+    if (!window.confirm("入力内容を初期値に戻します。よろしいですか？")) return;
+    setJobs(DEFAULT_JOBS);
+    setProfile(DEFAULT_PROFILE);
+    setExtraScenarios([]);
+  }
+
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-10">
       <div>
-        <Link href="/" className="text-sm text-muted hover:text-series-1">
-          ← トップに戻る
-        </Link>
+        <div className="flex items-center justify-between gap-2">
+          <Link href="/" className="text-sm text-muted hover:text-series-1">
+            ← トップに戻る
+          </Link>
+          <button
+            type="button"
+            onClick={resetToDefaults}
+            className="text-xs text-muted hover:text-status-critical"
+          >
+            入力を初期値に戻す
+          </button>
+        </div>
         <h1 className="mt-2 text-2xl font-semibold text-primary">
           マルチジョブ扶養最適化シミュレーター
         </h1>
         <p className="mt-1 text-sm text-secondary">
-          複数バイトの時給・シフト・開始月を入力すると、123万円の壁・社会保険の壁までの残り稼働可能時間と、超えた場合の負担額の目安を横断で確認できます。通勤手当は所得税の壁では非課税(除外)、社会保険の壁では収入に含めて計算します。入力内容はブラウザ内だけで計算され、サーバーには送信されません。
+          複数バイトの時給・シフト・開始月を入力すると、123万円の壁・社会保険の壁までの残り稼働可能時間と、超えた場合の負担額の目安を横断で確認できます。通勤手当は所得税の壁では非課税(除外)、社会保険の壁では収入に含めて計算します。入力内容はブラウザのlocalStorageに保存され、次回も引き継がれます（サーバーには送信されません）。
         </p>
       </div>
 

@@ -12,6 +12,7 @@ import {
   totalMonthlyFixedCost,
 } from "@/lib/economicZone";
 import { formatYen } from "@/lib/format";
+import { useLocalStorageState } from "@/lib/useLocalStorageState";
 import type { EconomicZoneInput } from "@/lib/types";
 
 const DEFAULT_INPUT: EconomicZoneInput = {
@@ -32,7 +33,10 @@ const DEFAULT_INPUT: EconomicZoneInput = {
 };
 
 export default function EconomicZonePage() {
-  const [input, setInput] = useState<EconomicZoneInput>(DEFAULT_INPUT);
+  const [input, setInput] = useLocalStorageState<EconomicZoneInput>(
+    "economicZone:input",
+    DEFAULT_INPUT,
+  );
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
   const results = useMemo(() => diagnoseEconomicZone(input), [input]);
