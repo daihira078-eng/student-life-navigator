@@ -10,6 +10,7 @@ import { ScenarioForm } from "@/components/simulator/ScenarioForm";
 import { ScenarioComparisonTable } from "@/components/simulator/ScenarioComparisonTable";
 import { MultiYearTable } from "@/components/simulator/MultiYearTable";
 import { MultiYearChart } from "@/components/simulator/MultiYearChart";
+import { ActualComparisonChart } from "@/components/simulator/ActualComparisonChart";
 import { cumulativeByMonth, evaluateMultiYear, evaluateWalls, getWalls } from "@/lib/wallCalculator";
 import { useLocalStorageState } from "@/lib/useLocalStorageState";
 import type { DependencyProfile, Job, Scenario } from "@/lib/types";
@@ -273,6 +274,11 @@ export default function SimulatorPage() {
             </div>
           )}
         </div>
+      </div>
+
+      <div className="border-t border-(--border-hairline) pt-6">
+        <h2 className="mb-3 text-lg font-semibold text-primary">実績との答え合わせ</h2>
+        <ActualComparisonChart jobs={jobs} />
       </div>
     </main>
   );
