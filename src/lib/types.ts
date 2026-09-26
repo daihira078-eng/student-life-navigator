@@ -8,6 +8,12 @@ export interface Job {
   monthlyCommutingAllowance: number; // 通勤手当(円/月)。所得税の壁では非課税(除外)、社会保険の壁では収入に含む
 }
 
+export interface Scenario {
+  id: string;
+  name: string;
+  jobs: Job[];
+}
+
 export interface DependencyProfile {
   isSpecificDependent: boolean; // 19-23歳 特定扶養控除の対象か
   socialInsuranceDependent: boolean; // 社会保険上の扶養に入っているか

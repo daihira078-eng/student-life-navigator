@@ -6,8 +6,10 @@ import { JobForm } from "@/components/simulator/JobForm";
 import { ProfileForm } from "@/components/simulator/ProfileForm";
 import { WallGauge } from "@/components/simulator/WallGauge";
 import { IncomeChart, type IncomeSeries } from "@/components/simulator/IncomeChart";
-import { cumulativeByMonth, evaluateWalls } from "@/lib/wallCalculator";
-import type { DependencyProfile, Job } from "@/lib/types";
+import { ScenarioForm } from "@/components/simulator/ScenarioForm";
+import { ScenarioComparisonTable } from "@/components/simulator/ScenarioComparisonTable";
+import { cumulativeByMonth, evaluateWalls, getWalls } from "@/lib/wallCalculator";
+import type { DependencyProfile, Job, Scenario } from "@/lib/types";
 
 const DEFAULT_JOBS: Job[] = [
   {
@@ -46,9 +48,14 @@ const SERIES_COLOR: Record<string, string> = {
   socialInsurance: "var(--series-6)",
 };
 
+const SCENARIO_COLORS = ["var(--series-1)", "var(--series-2)", "var(--series-3)", "var(--series-4)"];
+
+let scenarioCounter = 1;
+
 export default function SimulatorPage() {
   const [jobs, setJobs] = useState<Job[]>(DEFAULT_JOBS);
   const [profile, setProfile] = useState<DependencyProfile>(DEFAULT_PROFILE);
+  const [extraScenarios, setExtraScenarios] = useState<Scenario[]>([]);
 
   const walls = useMemo(() => evaluateWalls(jobs, profile), [jobs, profile]);
   const series: IncomeSeries[] = useMemo(
@@ -61,6 +68,51 @@ export default function SimulatorPage() {
       })),
     [jobs, walls],
   );
+
+  const wallOptions = useMemo(() => getWalls(profile), [profile]);
+  const [comparisonWallKey, setComparisonWallKey] = useState(wallOptions[0]?.key);
+  const activeComparisonWallKey = wallOptions.some((w) => w.key === comparisonWallKey)
+    ? comparisonWallKey
+    : wallOptions[0]?.key;
+
+  const allScenarios: Scenario[] = useMemo(
+    () => [{ id: "current", name: "現状", jobs }, ...extraScenarios],
+    [jobs, extraScenarios],
+  );
+
+  const comparisonSeries: IncomeSeries[] = useMemo(() => {
+    if (!activeComparisonWallKey) return [];
+    return allScenarios.map((s, i) => ({
+      key: s.id,
+      label: s.name,
+      cumulative: cumulativeByMonth(s.jobs, activeComparisonWallKey),
+      color: SCENARIO_COLORS[i % SCENARIO_COLORS.length],
+    }));
+  }, [allScenarios, activeComparisonWallKey]);
+
+  const comparisonWalls = useMemo(
+    () => (activeComparisonWallKey ? walls.filter((w) => w.wall.key === activeComparisonWallKey) : []),
+    [walls, activeComparisonWallKey],
+  );
+
+  function addScenario() {
+    setExtraScenarios([
+      ...extraScenarios,
+      {
+        id: `scenario-${scenarioCounter++}`,
+        name: `シナリオ${extraScenarios.length + 2}`,
+        jobs: jobs.map((j) => ({ ...j, id: `${j.id}-copy-${scenarioCounter}` })),
+      },
+    ]);
+  }
+
+  function updateScenario(id: string, next: Scenario) {
+    setExtraScenarios(extraScenarios.map((s) => (s.id === id ? next : s)));
+  }
+
+  function removeScenario(id: string) {
+    setExtraScenarios(extraScenarios.filter((s) => s.id !== id));
+  }
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-10">
@@ -93,6 +145,62 @@ export default function SimulatorPage() {
           ))}
           <IncomeChart series={series} walls={walls} targetYear={profile.targetYear} />
         </div>
+      </div>
+
+      <div className="border-t border-(--border-hairline) pt-6">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-primary">シナリオ比較</h2>
+          <button
+            type="button"
+            onClick={addScenario}
+            className="rounded border border-dashed border-series-2 px-3 py-1.5 text-sm text-series-2 hover:opacity-80"
+          >
+            + 比較シナリオを追加（例: バイト追加/バイトを辞める）
+          </button>
+        </div>
+
+        {extraScenarios.length === 0 ? (
+          <p className="text-sm text-secondary">
+            「バイトを1つ増やしたら」「今のバイトを辞めたら」を現状と並べて比較できます。上のボタンから追加してください。
+          </p>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {extraScenarios.map((scenario) => (
+              <ScenarioForm
+                key={scenario.id}
+                scenario={scenario}
+                onChange={(next) => updateScenario(scenario.id, next)}
+                onRemove={() => removeScenario(scenario.id)}
+              />
+            ))}
+
+            {wallOptions.length > 1 && (
+              <label className="flex items-center gap-2 text-sm text-secondary">
+                比較する壁
+                <select
+                  value={activeComparisonWallKey}
+                  onChange={(e) =>
+                    setComparisonWallKey(e.target.value as "incomeTax" | "socialInsurance")
+                  }
+                  className="rounded border border-(--border-hairline) bg-transparent px-2 py-1 text-primary"
+                >
+                  {wallOptions.map((w) => (
+                    <option key={w.key} value={w.key}>
+                      {w.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+
+            <ScenarioComparisonTable scenarios={allScenarios} profile={profile} />
+            <IncomeChart
+              series={comparisonSeries}
+              walls={comparisonWalls}
+              targetYear={profile.targetYear}
+            />
+          </div>
+        )}
       </div>
     </main>
   );
