@@ -27,13 +27,20 @@ export function DiagnosisCard({ result }: { result: DiagnosisResult }) {
           <div className="font-medium text-primary">{result.currentLabel}</div>
         </div>
         <div>
-          <div className="text-xs text-muted">比較先（開発者が実際に選んだ先）</div>
+          <div className="text-xs text-muted">比較先</div>
           <div className="font-medium text-primary">{result.compareLabel}</div>
         </div>
       </div>
 
       <p className="mt-2 text-xs text-secondary">{result.note}</p>
       <p className="mt-1 text-xs text-muted">{result.sourceNote}</p>
+
+      {result.fitNote && (
+        <div className="mt-3 rounded-md border border-dashed border-series-1 p-3 text-xs">
+          <span className="font-medium text-series-1">①現状の評価: </span>
+          <span className="text-secondary">{result.fitNote}</span>
+        </div>
+      )}
     </div>
   );
 }

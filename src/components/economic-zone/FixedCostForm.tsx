@@ -6,8 +6,15 @@ import { SUBSCRIPTION_CATALOG } from "@/lib/subscriptionCatalog";
 
 let nextId = 1;
 export function createEmptyFixedCost(): FixedCost {
-  return { id: `cost-${nextId++}`, name: "", monthlyAmount: 0 };
+  return { id: `cost-${nextId++}`, name: "", monthlyAmount: 0, frequency: "weekly" };
 }
+
+const FREQUENCY_OPTIONS: { value: FixedCost["frequency"]; label: string }[] = [
+  { value: "daily", label: "毎日使う" },
+  { value: "weekly", label: "週数回使う" },
+  { value: "monthly", label: "月数回使う" },
+  { value: "rarely", label: "ほとんど使わない" },
+];
 
 interface FixedCostFormProps {
   fixedCosts: FixedCost[];
@@ -42,7 +49,12 @@ export function FixedCostForm({ fixedCosts, onChange }: FixedCostFormProps) {
   function addFromCatalog() {
     onChange([
       ...fixedCosts,
-      { id: `cost-${nextId++}`, name: `${service.name}（${plan.name}）`, monthlyAmount: plan.monthlyAmount },
+      {
+        id: `cost-${nextId++}`,
+        name: `${service.name}（${plan.name}）`,
+        monthlyAmount: plan.monthlyAmount,
+        frequency: "weekly",
+      },
     ]);
   }
 
@@ -118,6 +130,19 @@ export function FixedCostForm({ fixedCosts, onChange }: FixedCostFormProps) {
               className="w-28 rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1"
             />
             <span className="text-xs text-muted">円/月</span>
+            <select
+              value={cost.frequency}
+              onChange={(e) =>
+                update(cost.id, { frequency: e.target.value as FixedCost["frequency"] })
+              }
+              className="rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-xs text-primary outline-none focus:border-series-1"
+            >
+              {FREQUENCY_OPTIONS.map((f) => (
+                <option key={f.value} value={f.value}>
+                  {f.label}
+                </option>
+              ))}
+            </select>
             <button
               type="button"
               onClick={() => remove(cost.id)}

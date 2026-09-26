@@ -36,7 +36,7 @@ export function EconomicZoneForm({ input, onChange }: EconomicZoneFormProps) {
             <option value="other">その他</option>
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs text-secondary">
+        <label className="mb-3 flex flex-col gap-1 text-xs text-secondary">
           月のカード利用額（円）
           <input
             type="number"
@@ -45,6 +45,22 @@ export function EconomicZoneForm({ input, onChange }: EconomicZoneFormProps) {
             onChange={(e) => set("monthlyCardSpend", Number(e.target.value))}
             className={numberInputClass}
           />
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-secondary">
+          よく使う決済/経済圏
+          <select
+            value={input.shoppingPriority}
+            onChange={(e) =>
+              set("shoppingPriority", e.target.value as EconomicZoneInput["shoppingPriority"])
+            }
+            className={selectClass}
+          >
+            <option value="none">特にない</option>
+            <option value="rakuten_market">楽天市場でよく買い物する</option>
+            <option value="yahoo_paypay">Yahoo!ショッピング/PayPayをよく使う</option>
+            <option value="d_payment">d払いをよく使う</option>
+            <option value="convenience_touch">コンビニ・飲食店でタッチ決済が多い</option>
+          </select>
         </label>
       </div>
 
@@ -95,7 +111,7 @@ export function EconomicZoneForm({ input, onChange }: EconomicZoneFormProps) {
             <option value="other">その他</option>
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs text-secondary">
+        <label className="mb-3 flex flex-col gap-1 text-xs text-secondary">
           現在の月額料金（円、わからなければ空欄）
           <input
             type="number"
@@ -109,6 +125,20 @@ export function EconomicZoneForm({ input, onChange }: EconomicZoneFormProps) {
             }
             className={numberInputClass}
           />
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-secondary">
+          使いたいギガ数の目安
+          <select
+            value={input.dataUsageTier}
+            onChange={(e) =>
+              set("dataUsageTier", e.target.value as EconomicZoneInput["dataUsageTier"])
+            }
+            className={selectClass}
+          >
+            <option value="light">〜3GB程度</option>
+            <option value="medium">3〜20GB程度</option>
+            <option value="heavy">20GB以上・無制限に使いたい</option>
+          </select>
         </label>
       </div>
 

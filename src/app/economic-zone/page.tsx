@@ -17,15 +17,17 @@ import type { EconomicZoneInput } from "@/lib/types";
 const DEFAULT_INPUT: EconomicZoneInput = {
   currentCard: "yucho",
   monthlyCardSpend: 50000,
+  shoppingPriority: "none",
   currentNisaBroker: "yucho",
   nisaBalance: 48000,
   currentTelecom: "docomo",
   currentTelecomMonthlyFee: null,
+  dataUsageTier: "medium",
   currentBank: "rakuten",
   fixedCosts: [
-    { id: "cost-netflix", name: "Netflix（スタンダード）", monthlyAmount: 1590 },
-    { id: "cost-prime", name: "Amazon Prime（通常）", monthlyAmount: 500 },
-    { id: "cost-claude", name: "Claude Pro（個人）", monthlyAmount: 3000 },
+    { id: "cost-netflix", name: "Netflix（スタンダード）", monthlyAmount: 1590, frequency: "weekly" },
+    { id: "cost-prime", name: "Amazon Prime（通常）", monthlyAmount: 500, frequency: "weekly" },
+    { id: "cost-claude", name: "Claude Pro（個人）", monthlyAmount: 3000, frequency: "daily" },
   ],
 };
 

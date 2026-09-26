@@ -42,10 +42,13 @@ export interface WallStatus {
   shiftSuggestion: ShiftSuggestion | null;
 }
 
+export type UsageFrequency = "daily" | "weekly" | "monthly" | "rarely";
+
 export interface FixedCost {
   id: string;
   name: string;
   monthlyAmount: number;
+  frequency: UsageFrequency;
 }
 
 export type CardOption =
@@ -59,14 +62,23 @@ export type CardOption =
 export type BankOption = "yucho_juroku" | "rakuten" | "other";
 export type TelecomOption = "docomo" | "au" | "softbank" | "rakuten_mobile" | "other";
 export type NisaBrokerOption = "yucho" | "rakuten" | "sbi" | "other";
+export type ShoppingPriority =
+  | "rakuten_market"
+  | "yahoo_paypay"
+  | "d_payment"
+  | "convenience_touch"
+  | "none";
+export type DataUsageTier = "light" | "medium" | "heavy";
 
 export interface EconomicZoneInput {
   currentCard: CardOption;
   monthlyCardSpend: number;
+  shoppingPriority: ShoppingPriority; // よく使う決済/経済圏
   currentNisaBroker: NisaBrokerOption;
   nisaBalance: number;
   currentTelecom: TelecomOption;
   currentTelecomMonthlyFee: number | null; // 不明なら null
+  dataUsageTier: DataUsageTier; // 使いたいギガ数の目安
   currentBank: BankOption;
   fixedCosts: FixedCost[];
 }
@@ -79,6 +91,7 @@ export interface DiagnosisResult {
   annualDiff: number | null; // nullは試算不可(データなし、または定性コメントのみ)
   note: string;
   sourceNote: string;
+  fitNote: string | null; // ①現状はあなたの使い方に合っているか、の評価
 }
 
 export interface SubscriptionTip {
