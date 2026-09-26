@@ -59,6 +59,9 @@ export function ActualComparisonChart({ jobs, actualIncome }: ActualComparisonCh
         validForError.length
       : null;
 
+  const predictedTotal = data.reduce((sum, d) => sum + d.予測, 0);
+  const actualTotal = data.reduce((sum, d) => sum + d.実績, 0);
+
   return (
     <div className="rounded-lg border border-(--border-hairline) bg-surface p-4">
       <div className="mb-1 flex items-center justify-between gap-2">
@@ -70,6 +73,18 @@ export function ActualComparisonChart({ jobs, actualIncome }: ActualComparisonCh
       <p className="mb-3 text-xs text-secondary">
         今の入力（時給・シフト）で計算した「予測」と、実際に記録していた「実績」を並べています。ズレが大きい場合、当時のシフトは今より変動が大きかった可能性があります。
       </p>
+      {data.length > 0 && (
+        <div className="mb-3 grid grid-cols-2 gap-2 text-sm">
+          <div>
+            <div className="text-xs text-muted">予測合計（入力中の月分）</div>
+            <div className="font-medium text-primary">{formatYen(predictedTotal)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted">実績合計</div>
+            <div className="font-medium text-primary">{formatYen(actualTotal)}</div>
+          </div>
+        </div>
+      )}
       {data.length === 0 ? (
         <p className="text-sm text-secondary">左のフォームから実績を追加すると、ここに比較が表示されます。</p>
       ) : (

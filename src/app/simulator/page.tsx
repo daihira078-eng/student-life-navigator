@@ -25,6 +25,7 @@ const DEFAULT_JOBS: Job[] = [
     daysPerWeek: 2.5,
     hoursPerDay: 4,
     startMonth: 4,
+    endMonth: null,
     monthlyCommutingAllowance: 0,
   },
   {
@@ -34,6 +35,7 @@ const DEFAULT_JOBS: Job[] = [
     daysPerWeek: 1,
     hoursPerDay: 3.5,
     startMonth: 8,
+    endMonth: null,
     monthlyCommutingAllowance: 0,
   },
 ];

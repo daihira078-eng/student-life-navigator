@@ -58,13 +58,17 @@ export function monthlyIncomeForWall(job: Job, wallKey: WallDefinition["key"]): 
   return wallKey === "socialInsurance" ? wage + job.monthlyCommutingAllowance : wage;
 }
 
+function isJobActiveInMonth(job: Job, month: number): boolean {
+  return job.startMonth <= month && (job.endMonth === null || month <= job.endMonth);
+}
+
 export function totalMonthlyIncomeForWall(
   jobs: Job[],
   month: number,
   wallKey: WallDefinition["key"],
 ): number {
   return jobs
-    .filter((job) => job.startMonth <= month)
+    .filter((job) => isJobActiveInMonth(job, month))
     .reduce((sum, job) => sum + monthlyIncomeForWall(job, wallKey), 0);
 }
 
@@ -141,7 +145,7 @@ function suggestShiftReduction(
 
   const contributions = jobs
     .map((job) => {
-      const activeMonths = 12 - job.startMonth + 1;
+      const activeMonths = (job.endMonth ?? 12) - job.startMonth + 1;
       const annualContribution = monthlyIncomeForWall(job, wallKey) * activeMonths;
       return { job, activeMonths, annualContribution };
     })

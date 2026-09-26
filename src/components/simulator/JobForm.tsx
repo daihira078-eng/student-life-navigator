@@ -13,6 +13,7 @@ export function createEmptyJob(): Job {
     daysPerWeek: 2,
     hoursPerDay: 4,
     startMonth: 1,
+    endMonth: null,
     monthlyCommutingAllowance: 0,
   };
 }
@@ -59,7 +60,7 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
             <label className="flex flex-col gap-1 text-xs text-secondary">
               バイト名
               <input
@@ -106,6 +107,25 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
                 {MONTHS.map((m) => (
                   <option key={m} value={m}>
                     {m}月〜
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-secondary">
+              終了月
+              <select
+                value={job.endMonth ?? "none"}
+                onChange={(e) =>
+                  updateJob(job.id, {
+                    endMonth: e.target.value === "none" ? null : Number(e.target.value),
+                  })
+                }
+                className="rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1"
+              >
+                <option value="none">継続中</option>
+                {MONTHS.map((m) => (
+                  <option key={m} value={m}>
+                    〜{m}月
                   </option>
                 ))}
               </select>
