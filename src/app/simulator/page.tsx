@@ -8,11 +8,9 @@ import { WallGauge } from "@/components/simulator/WallGauge";
 import { IncomeChart, type IncomeSeries } from "@/components/simulator/IncomeChart";
 import { ScenarioForm } from "@/components/simulator/ScenarioForm";
 import { ScenarioComparisonTable } from "@/components/simulator/ScenarioComparisonTable";
-import { MultiYearTable } from "@/components/simulator/MultiYearTable";
-import { MultiYearChart } from "@/components/simulator/MultiYearChart";
 import { ActualComparisonChart } from "@/components/simulator/ActualComparisonChart";
 import { ActualIncomeForm } from "@/components/simulator/ActualIncomeForm";
-import { cumulativeByMonth, evaluateMultiYear, evaluateWalls, getWalls } from "@/lib/wallCalculator";
+import { cumulativeByMonth, evaluateWalls, getWalls } from "@/lib/wallCalculator";
 import { useLocalStorageState } from "@/lib/useLocalStorageState";
 import { ACTUAL_INCOME_2026, type ActualIncomeRecord } from "@/lib/actualIncomeData";
 import type { DependencyProfile, Job, Scenario } from "@/lib/types";
@@ -46,8 +44,6 @@ const DEFAULT_PROFILE: DependencyProfile = {
   targetYear: new Date().getFullYear(),
 };
 
-const MULTI_YEAR_SPAN = 7;
-
 const SERIES_LABEL: Record<string, string> = {
   incomeTax: "所得税ベースの収入（通勤手当を除く）",
   socialInsurance: "社会保険ベースの収入（通勤手当を含む）",
@@ -59,8 +55,6 @@ const SERIES_COLOR: Record<string, string> = {
 };
 
 const SCENARIO_COLORS = ["var(--series-1)", "var(--series-2)", "var(--series-3)", "var(--series-4)"];
-
-let scenarioCounter = 1;
 
 export default function SimulatorPage() {
   const [jobs, setJobs] = useLocalStorageState<Job[]>("simulator:jobs", DEFAULT_JOBS);
@@ -115,22 +109,15 @@ export default function SimulatorPage() {
     [walls, activeComparisonWallKey],
   );
 
-  const multiYearPoints = useMemo(
-    () => evaluateMultiYear(jobs, profile, MULTI_YEAR_SPAN),
-    [jobs, profile],
-  );
-  const [multiYearWallKey, setMultiYearWallKey] = useState(wallOptions[0]?.key);
-  const activeMultiYearWallKey = wallOptions.some((w) => w.key === multiYearWallKey)
-    ? multiYearWallKey
-    : wallOptions[0]?.key;
-
   function addScenario() {
+    // crypto.randomUUID()を使うのは、モジュール内カウンターだとページ再読み込みで
+    // 1から採番し直され、localStorage保存済みのシナリオ/バイトIDと衝突するバグがあったため
     setExtraScenarios([
       ...extraScenarios,
       {
-        id: `scenario-${scenarioCounter++}`,
+        id: `scenario-${crypto.randomUUID()}`,
         name: `シナリオ${extraScenarios.length + 2}`,
-        jobs: jobs.map((j) => ({ ...j, id: `${j.id}-copy-${scenarioCounter}` })),
+        jobs: jobs.map((j) => ({ ...j, id: `job-${crypto.randomUUID()}` })),
       },
     ]);
   }
@@ -247,42 +234,6 @@ export default function SimulatorPage() {
             />
           </div>
         )}
-      </div>
-
-      <div className="border-t border-(--border-hairline) pt-6">
-        <div className="mb-1 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-primary">複数年シミュレーション</h2>
-          {wallOptions.length > 1 && activeMultiYearWallKey && (
-            <label className="flex items-center gap-2 text-sm text-secondary">
-              見る壁
-              <select
-                value={activeMultiYearWallKey}
-                onChange={(e) =>
-                  setMultiYearWallKey(e.target.value as "incomeTax" | "socialInsurance")
-                }
-                className="rounded border border-(--border-hairline) bg-transparent px-2 py-1 text-primary"
-              >
-                {wallOptions.map((w) => (
-                  <option key={w.key} value={w.key}>
-                    {w.key === "incomeTax" ? "所得税の壁" : "社会保険の壁"}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-        </div>
-        <p className="mb-3 text-sm text-secondary">
-          今と同じバイトの組み合わせを続けた場合、年齢が上がるにつれて壁がどう変わるかを{MULTI_YEAR_SPAN}
-          年分先まで見せます。19〜23歳の間は社会保険の壁が150万円ですが、24歳になると130万円に戻ります。
-        </p>
-        <div className="flex flex-col gap-4">
-          <MultiYearTable points={multiYearPoints} />
-          {activeMultiYearWallKey && (
-            <div className="rounded-lg border border-(--border-hairline) bg-surface p-4">
-              <MultiYearChart points={multiYearPoints} wallKey={activeMultiYearWallKey} />
-            </div>
-          )}
-        </div>
       </div>
 
       <div className="border-t border-(--border-hairline) pt-6">

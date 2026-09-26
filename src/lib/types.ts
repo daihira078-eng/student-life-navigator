@@ -21,12 +21,6 @@ export interface DependencyProfile {
   targetYear: number; // シミュレーション対象年度（表示用ラベル。税制・社保の閾値は現行法のまま固定）
 }
 
-export interface MultiYearPoint {
-  age: number;
-  year: number;
-  walls: WallStatus[];
-}
-
 export interface WallDefinition {
   key: "incomeTax" | "socialInsurance";
   label: string;

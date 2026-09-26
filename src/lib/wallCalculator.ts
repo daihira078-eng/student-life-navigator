@@ -2,7 +2,6 @@ import type {
   DependencyProfile,
   ExcessImpact,
   Job,
-  MultiYearPoint,
   ShiftSuggestion,
   WallDefinition,
   WallStatus,
@@ -190,26 +189,4 @@ export function evaluateWalls(jobs: Job[], profile: DependencyProfile): WallStat
       shiftSuggestion: suggestShiftReduction(jobs, excess, wall.key),
     };
   });
-}
-
-/**
- * 同じバイト配分を続けた場合に、年齢が上がるにつれて壁(特に社会保険の壁)がどう変わるかを
- * 複数年ぶんまとめて計算する。19〜23歳の間は150万円、24歳以降は130万円に自動で切り替わる。
- */
-export function evaluateMultiYear(
-  jobs: Job[],
-  profile: DependencyProfile,
-  yearsAhead: number,
-): MultiYearPoint[] {
-  const points: MultiYearPoint[] = [];
-  for (let i = 0; i < yearsAhead; i++) {
-    const age = profile.currentAge + i;
-    const yearProfile: DependencyProfile = { ...profile, currentAge: age };
-    points.push({
-      age,
-      year: profile.targetYear + i,
-      walls: evaluateWalls(jobs, yearProfile),
-    });
-  }
-  return points;
 }

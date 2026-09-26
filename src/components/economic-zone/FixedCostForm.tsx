@@ -4,9 +4,8 @@ import { useState } from "react";
 import type { FixedCost } from "@/lib/types";
 import { SUBSCRIPTION_CATALOG } from "@/lib/subscriptionCatalog";
 
-let nextId = 1;
 export function createEmptyFixedCost(): FixedCost {
-  return { id: `cost-${nextId++}`, name: "", monthlyAmount: 0, frequency: "weekly" };
+  return { id: `cost-${crypto.randomUUID()}`, name: "", monthlyAmount: 0, frequency: "weekly" };
 }
 
 const FREQUENCY_OPTIONS: { value: FixedCost["frequency"]; label: string }[] = [
@@ -50,7 +49,7 @@ export function FixedCostForm({ fixedCosts, onChange }: FixedCostFormProps) {
     onChange([
       ...fixedCosts,
       {
-        id: `cost-${nextId++}`,
+        id: `cost-${crypto.randomUUID()}`,
         name: `${service.name}（${plan.name}）`,
         monthlyAmount: plan.monthlyAmount,
         frequency: "weekly",

@@ -4,10 +4,12 @@ import type { Job } from "@/lib/types";
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 
-let nextId = 1;
 export function createEmptyJob(): Job {
   return {
-    id: `job-${nextId++}`,
+    // crypto.randomUUID()を使うのは、モジュール内カウンターだとページを再読み込みするたびに
+    // 1から採番し直され、localStorageに保存済みのIDと衝突して2つのバイトが同一ID扱いに
+    // なるバグが発生したため(片方を編集すると両方変わってしまう)
+    id: `job-${crypto.randomUUID()}`,
     name: "",
     hourlyWage: 1200,
     daysPerWeek: 2,

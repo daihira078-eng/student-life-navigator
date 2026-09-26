@@ -4,8 +4,6 @@ import type { ActualIncomeRecord } from "@/lib/actualIncomeData";
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 
-let nextId = 1;
-
 interface ActualIncomeFormProps {
   records: ActualIncomeRecord[];
   onChange: (records: ActualIncomeRecord[]) => void;
@@ -26,7 +24,6 @@ export function ActualIncomeForm({ records, onChange }: ActualIncomeFormProps) {
     onChange(
       [...records, { month: nextMonth, amount: 0 }].sort((a, b) => a.month - b.month),
     );
-    nextId++;
   }
 
   return (
@@ -34,7 +31,7 @@ export function ActualIncomeForm({ records, onChange }: ActualIncomeFormProps) {
       <div className="mb-3 text-sm font-semibold text-primary">実績を入力</div>
       <div className="flex flex-col gap-2">
         {records.map((record, index) => (
-          <div key={`${record.month}-${index}-${nextId}`} className="flex items-center gap-2">
+          <div key={index} className="flex items-center gap-2">
             <select
               value={record.month}
               onChange={(e) => update(index, { month: Number(e.target.value) })}
