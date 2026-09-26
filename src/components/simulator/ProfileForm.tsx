@@ -7,8 +7,6 @@ interface ProfileFormProps {
   onChange: (profile: DependencyProfile) => void;
 }
 
-const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
-
 export function ProfileForm({ profile, onChange }: ProfileFormProps) {
   return (
     <div className="rounded-lg border border-(--border-hairline) bg-surface p-4">
@@ -33,22 +31,6 @@ export function ProfileForm({ profile, onChange }: ProfileFormProps) {
               onChange({ ...profile, socialInsuranceDependent: e.target.checked })
             }
           />
-        </label>
-        <label className="flex items-center justify-between gap-2">
-          <span className="text-secondary">シミュレーション開始月</span>
-          <select
-            value={profile.startMonth}
-            onChange={(e) =>
-              onChange({ ...profile, startMonth: Number(e.target.value) })
-            }
-            className="rounded border border-(--border-hairline) bg-transparent px-2 py-1 text-primary"
-          >
-            {MONTHS.map((m) => (
-              <option key={m} value={m}>
-                {m}月
-              </option>
-            ))}
-          </select>
         </label>
       </div>
     </div>

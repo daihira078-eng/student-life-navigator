@@ -2,6 +2,8 @@
 
 import type { Job } from "@/lib/types";
 
+const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
+
 let nextId = 1;
 export function createEmptyJob(): Job {
   return {
@@ -10,6 +12,7 @@ export function createEmptyJob(): Job {
     hourlyWage: 1200,
     daysPerWeek: 2,
     hoursPerDay: 4,
+    startMonth: 1,
   };
 }
 
@@ -52,7 +55,7 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
               </button>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
             <label className="flex flex-col gap-1 text-xs text-secondary">
               バイト名
               <input
@@ -101,6 +104,22 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
                 }
                 className="rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1"
               />
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-secondary">
+              開始月
+              <select
+                value={job.startMonth}
+                onChange={(e) =>
+                  updateJob(job.id, { startMonth: Number(e.target.value) })
+                }
+                className="rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1"
+              >
+                {MONTHS.map((m) => (
+                  <option key={m} value={m}>
+                    {m}月〜
+                  </option>
+                ))}
+              </select>
             </label>
           </div>
         </div>

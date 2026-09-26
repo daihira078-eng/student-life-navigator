@@ -10,14 +10,27 @@ import { cumulativeByMonth, evaluateWalls } from "@/lib/wallCalculator";
 import type { DependencyProfile, Job } from "@/lib/types";
 
 const DEFAULT_JOBS: Job[] = [
-  { id: "job-cazan", name: "CAZAN珈琲店", hourlyWage: 1190, daysPerWeek: 2.5, hoursPerDay: 4 },
-  { id: "job-vexum", name: "VEXUM", hourlyWage: 1300, daysPerWeek: 1, hoursPerDay: 3.5 },
+  {
+    id: "job-cazan",
+    name: "CAZAN珈琲店",
+    hourlyWage: 1190,
+    daysPerWeek: 2.5,
+    hoursPerDay: 4,
+    startMonth: 4,
+  },
+  {
+    id: "job-vexum",
+    name: "VEXUM",
+    hourlyWage: 1300,
+    daysPerWeek: 1,
+    hoursPerDay: 3.5,
+    startMonth: 8,
+  },
 ];
 
 const DEFAULT_PROFILE: DependencyProfile = {
   isSpecificDependent: true,
   socialInsuranceDependent: true,
-  startMonth: 4,
 };
 
 export default function SimulatorPage() {
@@ -25,10 +38,7 @@ export default function SimulatorPage() {
   const [profile, setProfile] = useState<DependencyProfile>(DEFAULT_PROFILE);
 
   const walls = useMemo(() => evaluateWalls(jobs, profile), [jobs, profile]);
-  const cumulative = useMemo(
-    () => cumulativeByMonth(jobs, profile.startMonth),
-    [jobs, profile.startMonth],
-  );
+  const cumulative = useMemo(() => cumulativeByMonth(jobs), [jobs]);
   const overallStatus = walls.some((w) => w.status === "critical")
     ? "critical"
     : walls.some((w) => w.status === "warning")
@@ -45,7 +55,7 @@ export default function SimulatorPage() {
           マルチジョブ扶養最適化シミュレーター
         </h1>
         <p className="mt-1 text-sm text-secondary">
-          複数バイトの時給・シフトを入力すると、123万円の壁・130万円の壁までの残り稼働可能時間を横断で確認できます。入力内容はブラウザ内だけで計算され、サーバーには送信されません。
+          複数バイトの時給・シフト・開始月を入力すると、123万円の壁・社会保険の壁までの残り稼働可能時間と、超えた場合の負担額の目安を横断で確認できます。入力内容はブラウザ内だけで計算され、サーバーには送信されません。
         </p>
       </div>
 
@@ -58,7 +68,7 @@ export default function SimulatorPage() {
         <div className="flex flex-col gap-4">
           {walls.length === 0 && (
             <div className="rounded-lg border border-(--border-hairline) bg-surface p-4 text-sm text-secondary">
-              社会保険上の扶養に入っていない場合、130万円の壁は表示されません。
+              社会保険上の扶養に入っていない場合、社会保険の壁は表示されません。
             </div>
           )}
           {walls.map((status) => (

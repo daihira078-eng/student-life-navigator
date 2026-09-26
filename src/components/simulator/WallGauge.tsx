@@ -67,6 +67,21 @@ export function WallGauge({ status }: { status: WallStatus }) {
           </div>
         </div>
       </div>
+
+      {status.excessImpact && (
+        <div
+          className="mt-3 rounded-md border border-(--border-hairline) p-3"
+          style={{ background: STATUS_TRACK.critical }}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs text-secondary">{status.excessImpact.label}</span>
+            <span className="text-sm font-semibold" style={{ color: STATUS_COLOR.critical }}>
+              −{formatYen(status.excessImpact.amount)}
+            </span>
+          </div>
+          <p className="mt-1 text-xs text-muted">{status.excessImpact.note}</p>
+        </div>
+      )}
     </div>
   );
 }

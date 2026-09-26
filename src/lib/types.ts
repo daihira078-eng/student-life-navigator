@@ -4,19 +4,24 @@ export interface Job {
   hourlyWage: number;
   daysPerWeek: number;
   hoursPerDay: number;
+  startMonth: number; // 1-12, このバイトを始めた月
 }
 
 export interface DependencyProfile {
-  isSpecificDependent: boolean; // 19-23歳 特定扶養控除
-  socialInsuranceDependent: boolean;
-  startMonth: number; // 1-12, シミュレーション開始月
+  isSpecificDependent: boolean; // 19-23歳 特定扶養控除の対象か
+  socialInsuranceDependent: boolean; // 社会保険上の扶養に入っているか
 }
 
 export interface WallDefinition {
   key: "incomeTax" | "socialInsurance";
   label: string;
   threshold: number; // 円
-  appliesTo: (profile: DependencyProfile) => boolean;
+}
+
+export interface ExcessImpact {
+  label: string;
+  amount: number;
+  note: string;
 }
 
 export interface WallStatus {
@@ -26,4 +31,5 @@ export interface WallStatus {
   remainingHours: number;
   monthReached: number | null; // 1-12、その年度中に到達する場合
   status: "good" | "warning" | "critical";
+  excessImpact: ExcessImpact | null;
 }
