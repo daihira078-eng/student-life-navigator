@@ -82,6 +82,22 @@ export function WallGauge({ status }: { status: WallStatus }) {
           <p className="mt-1 text-xs text-muted">{status.excessImpact.note}</p>
         </div>
       )}
+
+      {status.shiftSuggestion && (
+        <div className="mt-2 rounded-md border border-dashed border-series-1 p-3">
+          <span className="text-xs font-medium text-series-1">回避の目安</span>
+          <p className="mt-1 text-sm text-secondary">
+            <span className="font-semibold text-primary">
+              {status.shiftSuggestion.jobName}
+            </span>
+            の週の勤務時間を約
+            <span className="font-semibold text-primary">
+              {formatHours(status.shiftSuggestion.weeklyHourReduction)}
+            </span>
+            減らすと、年間見込みが壁以内に収まります
+          </p>
+        </div>
+      )}
     </div>
   );
 }

@@ -31,6 +31,7 @@ const DEFAULT_JOBS: Job[] = [
 const DEFAULT_PROFILE: DependencyProfile = {
   isSpecificDependent: true,
   socialInsuranceDependent: true,
+  targetYear: new Date().getFullYear(),
 };
 
 export default function SimulatorPage() {
@@ -74,7 +75,12 @@ export default function SimulatorPage() {
           {walls.map((status) => (
             <WallGauge key={status.wall.key} status={status} />
           ))}
-          <IncomeChart cumulative={cumulative} walls={walls} overallStatus={overallStatus} />
+          <IncomeChart
+            cumulative={cumulative}
+            walls={walls}
+            overallStatus={overallStatus}
+            targetYear={profile.targetYear}
+          />
         </div>
       </div>
     </main>

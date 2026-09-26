@@ -10,6 +10,7 @@ export interface Job {
 export interface DependencyProfile {
   isSpecificDependent: boolean; // 19-23歳 特定扶養控除の対象か
   socialInsuranceDependent: boolean; // 社会保険上の扶養に入っているか
+  targetYear: number; // シミュレーション対象年度（表示用ラベル。税制・社保の閾値は現行法のまま固定）
 }
 
 export interface WallDefinition {
@@ -24,6 +25,12 @@ export interface ExcessImpact {
   note: string;
 }
 
+export interface ShiftSuggestion {
+  jobId: string;
+  jobName: string;
+  weeklyHourReduction: number;
+}
+
 export interface WallStatus {
   wall: WallDefinition;
   annualProjection: number;
@@ -32,4 +39,5 @@ export interface WallStatus {
   monthReached: number | null; // 1-12、その年度中に到達する場合
   status: "good" | "warning" | "critical";
   excessImpact: ExcessImpact | null;
+  shiftSuggestion: ShiftSuggestion | null;
 }

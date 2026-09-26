@@ -17,6 +17,7 @@ interface IncomeChartProps {
   cumulative: number[]; // 12ヶ月分
   walls: WallStatus[];
   overallStatus: WallStatus["status"];
+  targetYear: number;
 }
 
 const LINE_COLOR: Record<WallStatus["status"], string> = {
@@ -43,13 +44,13 @@ function ChartTooltip({
   );
 }
 
-export function IncomeChart({ cumulative, walls, overallStatus }: IncomeChartProps) {
+export function IncomeChart({ cumulative, walls, overallStatus, targetYear }: IncomeChartProps) {
   const data = cumulative.map((value, index) => ({ month: index + 1, income: value }));
 
   return (
     <div className="rounded-lg border border-(--border-hairline) bg-surface p-4">
       <div className="mb-3 text-sm font-semibold text-primary">
-        月別 累積収入の見込み
+        {targetYear}年 月別 累積収入の見込み
       </div>
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">

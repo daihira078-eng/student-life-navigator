@@ -1,4 +1,11 @@
-import type { DependencyProfile, ExcessImpact, Job, WallDefinition, WallStatus } from "./types";
+import type {
+  DependencyProfile,
+  ExcessImpact,
+  Job,
+  ShiftSuggestion,
+  WallDefinition,
+  WallStatus,
+} from "./types";
 
 const WEEKS_PER_MONTH = 52 / 12;
 
@@ -99,6 +106,34 @@ function estimateExcessImpact(wall: WallDefinition, annualProjection: number): E
   };
 }
 
+/**
+ * 壁を超える見込みの場合、年間寄与額が最大のバイトを対象に、
+ * 週の勤務時間をどれだけ減らせば壁以内に収まるかを逆算する。
+ * 寄与額が最大のバイトを選ぶのは、そのバイトの時間を調整するのが最も効果が大きいため。
+ */
+function suggestShiftReduction(jobs: Job[], excess: number): ShiftSuggestion | null {
+  if (excess <= 0) return null;
+
+  const contributions = jobs
+    .map((job) => {
+      const activeMonths = 12 - job.startMonth + 1;
+      return { job, activeMonths, annualContribution: monthlyIncomeOfJob(job) * activeMonths };
+    })
+    .filter((c) => c.activeMonths > 0 && c.annualContribution > 0);
+
+  if (contributions.length === 0) return null;
+
+  const target = contributions.reduce((a, b) => (b.annualContribution > a.annualContribution ? b : a));
+  const weeklyHourReduction =
+    excess / (target.job.hourlyWage * WEEKS_PER_MONTH * target.activeMonths);
+
+  return {
+    jobId: target.job.id,
+    jobName: target.job.name || "バイト",
+    weeklyHourReduction,
+  };
+}
+
 export function evaluateWalls(jobs: Job[], profile: DependencyProfile): WallStatus[] {
   const cumulative = cumulativeByMonth(jobs);
   const annualProjection = cumulative[11];
@@ -108,6 +143,7 @@ export function evaluateWalls(jobs: Job[], profile: DependencyProfile): WallStat
   return walls.map((wall) => {
     const remainingAmount = Math.max(0, wall.threshold - annualProjection);
     const remainingHours = avgWage > 0 ? remainingAmount / avgWage : 0;
+    const excess = annualProjection - wall.threshold;
     return {
       wall,
       annualProjection,
@@ -116,6 +152,7 @@ export function evaluateWalls(jobs: Job[], profile: DependencyProfile): WallStat
       monthReached: monthReached(cumulative, wall.threshold),
       status: statusOf(annualProjection, wall.threshold),
       excessImpact: estimateExcessImpact(wall, annualProjection),
+      shiftSuggestion: suggestShiftReduction(jobs, excess),
     };
   });
 }
