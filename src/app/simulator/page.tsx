@@ -11,8 +11,10 @@ import { ScenarioComparisonTable } from "@/components/simulator/ScenarioComparis
 import { MultiYearTable } from "@/components/simulator/MultiYearTable";
 import { MultiYearChart } from "@/components/simulator/MultiYearChart";
 import { ActualComparisonChart } from "@/components/simulator/ActualComparisonChart";
+import { ActualIncomeForm } from "@/components/simulator/ActualIncomeForm";
 import { cumulativeByMonth, evaluateMultiYear, evaluateWalls, getWalls } from "@/lib/wallCalculator";
 import { useLocalStorageState } from "@/lib/useLocalStorageState";
+import { ACTUAL_INCOME_2026, type ActualIncomeRecord } from "@/lib/actualIncomeData";
 import type { DependencyProfile, Job, Scenario } from "@/lib/types";
 
 const DEFAULT_JOBS: Job[] = [
@@ -67,6 +69,10 @@ export default function SimulatorPage() {
   const [extraScenarios, setExtraScenarios] = useLocalStorageState<Scenario[]>(
     "simulator:extraScenarios",
     [],
+  );
+  const [actualIncome, setActualIncome] = useLocalStorageState<ActualIncomeRecord[]>(
+    "simulator:actualIncome",
+    ACTUAL_INCOME_2026,
   );
 
   const walls = useMemo(() => evaluateWalls(jobs, profile), [jobs, profile]);
@@ -140,6 +146,7 @@ export default function SimulatorPage() {
     setJobs(DEFAULT_JOBS);
     setProfile(DEFAULT_PROFILE);
     setExtraScenarios([]);
+    setActualIncome(ACTUAL_INCOME_2026);
   }
 
   return (
@@ -278,7 +285,10 @@ export default function SimulatorPage() {
 
       <div className="border-t border-(--border-hairline) pt-6">
         <h2 className="mb-3 text-lg font-semibold text-primary">実績との答え合わせ</h2>
-        <ActualComparisonChart jobs={jobs} />
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+          <ActualIncomeForm records={actualIncome} onChange={setActualIncome} />
+          <ActualComparisonChart jobs={jobs} actualIncome={actualIncome} />
+        </div>
       </div>
     </main>
   );
