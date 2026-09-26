@@ -5,6 +5,7 @@ export interface Job {
   daysPerWeek: number;
   hoursPerDay: number;
   startMonth: number; // 1-12, このバイトを始めた月
+  monthlyCommutingAllowance: number; // 通勤手当(円/月)。所得税の壁では非課税(除外)、社会保険の壁では収入に含む
 }
 
 export interface DependencyProfile {

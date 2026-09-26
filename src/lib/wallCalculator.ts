@@ -38,14 +38,27 @@ export function getWalls(profile: DependencyProfile): WallDefinition[] {
   return walls;
 }
 
-export function monthlyIncomeOfJob(job: Job): number {
+export function monthlyWageIncome(job: Job): number {
   return job.hourlyWage * job.hoursPerDay * job.daysPerWeek * WEEKS_PER_MONTH;
 }
 
-export function totalMonthlyIncome(jobs: Job[], month: number): number {
+/**
+ * 通勤手当は所得税の壁では非課税のため除外し、社会保険の壁では標準報酬月額の対象として含める。
+ * （出典: 通勤手当は所得税法上非課税だが、社会保険料の算定では「報酬」に含まれる）
+ */
+export function monthlyIncomeForWall(job: Job, wallKey: WallDefinition["key"]): number {
+  const wage = monthlyWageIncome(job);
+  return wallKey === "socialInsurance" ? wage + job.monthlyCommutingAllowance : wage;
+}
+
+export function totalMonthlyIncomeForWall(
+  jobs: Job[],
+  month: number,
+  wallKey: WallDefinition["key"],
+): number {
   return jobs
     .filter((job) => job.startMonth <= month)
-    .reduce((sum, job) => sum + monthlyIncomeOfJob(job), 0);
+    .reduce((sum, job) => sum + monthlyIncomeForWall(job, wallKey), 0);
 }
 
 export function weightedAverageWage(jobs: Job[]): number {
@@ -58,12 +71,12 @@ export function weightedAverageWage(jobs: Job[]): number {
   return totalWagedHours / totalHours;
 }
 
-/** 1月始まりの暦年で、各バイトの開始月より前は0円として12ヶ月分の累積収入を返す */
-export function cumulativeByMonth(jobs: Job[]): number[] {
+/** 1月始まりの暦年で、各バイトの開始月より前は0円として12ヶ月分の累積収入を返す（壁の種類ごとに定義が異なる） */
+export function cumulativeByMonth(jobs: Job[], wallKey: WallDefinition["key"]): number[] {
   const result: number[] = [];
   let cumulative = 0;
   for (let month = 1; month <= 12; month++) {
-    cumulative += totalMonthlyIncome(jobs, month);
+    cumulative += totalMonthlyIncomeForWall(jobs, month, wallKey);
     result.push(cumulative);
   }
   return result;
@@ -110,14 +123,20 @@ function estimateExcessImpact(wall: WallDefinition, annualProjection: number): E
  * 壁を超える見込みの場合、年間寄与額が最大のバイトを対象に、
  * 週の勤務時間をどれだけ減らせば壁以内に収まるかを逆算する。
  * 寄与額が最大のバイトを選ぶのは、そのバイトの時間を調整するのが最も効果が大きいため。
+ * 通勤手当は勤務時間を減らしても変わらない前提のため、削減額は時給部分のみで逆算する。
  */
-function suggestShiftReduction(jobs: Job[], excess: number): ShiftSuggestion | null {
+function suggestShiftReduction(
+  jobs: Job[],
+  excess: number,
+  wallKey: WallDefinition["key"],
+): ShiftSuggestion | null {
   if (excess <= 0) return null;
 
   const contributions = jobs
     .map((job) => {
       const activeMonths = 12 - job.startMonth + 1;
-      return { job, activeMonths, annualContribution: monthlyIncomeOfJob(job) * activeMonths };
+      const annualContribution = monthlyIncomeForWall(job, wallKey) * activeMonths;
+      return { job, activeMonths, annualContribution };
     })
     .filter((c) => c.activeMonths > 0 && c.annualContribution > 0);
 
@@ -135,12 +154,12 @@ function suggestShiftReduction(jobs: Job[], excess: number): ShiftSuggestion | n
 }
 
 export function evaluateWalls(jobs: Job[], profile: DependencyProfile): WallStatus[] {
-  const cumulative = cumulativeByMonth(jobs);
-  const annualProjection = cumulative[11];
   const avgWage = weightedAverageWage(jobs);
   const walls = getWalls(profile);
 
   return walls.map((wall) => {
+    const cumulative = cumulativeByMonth(jobs, wall.key);
+    const annualProjection = cumulative[11];
     const remainingAmount = Math.max(0, wall.threshold - annualProjection);
     const remainingHours = avgWage > 0 ? remainingAmount / avgWage : 0;
     const excess = annualProjection - wall.threshold;
@@ -152,7 +171,7 @@ export function evaluateWalls(jobs: Job[], profile: DependencyProfile): WallStat
       monthReached: monthReached(cumulative, wall.threshold),
       status: statusOf(annualProjection, wall.threshold),
       excessImpact: estimateExcessImpact(wall, annualProjection),
-      shiftSuggestion: suggestShiftReduction(jobs, excess),
+      shiftSuggestion: suggestShiftReduction(jobs, excess, wall.key),
     };
   });
 }

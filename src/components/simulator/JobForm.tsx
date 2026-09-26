@@ -13,6 +13,7 @@ export function createEmptyJob(): Job {
     daysPerWeek: 2,
     hoursPerDay: 4,
     startMonth: 1,
+    monthlyCommutingAllowance: 0,
   };
 }
 
@@ -20,6 +21,8 @@ interface JobFormProps {
   jobs: Job[];
   onChange: (jobs: Job[]) => void;
 }
+
+const sliderClass = "h-2 w-full cursor-pointer accent-[var(--series-1)]";
 
 export function JobForm({ jobs, onChange }: JobFormProps) {
   function updateJob(id: string, patch: Partial<Job>) {
@@ -55,7 +58,8 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
               </button>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <label className="flex flex-col gap-1 text-xs text-secondary">
               バイト名
               <input
@@ -79,28 +83,13 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
               />
             </label>
             <label className="flex flex-col gap-1 text-xs text-secondary">
-              週の勤務日数
+              通勤手当（円/月）
               <input
                 type="number"
                 min={0}
-                max={7}
-                value={job.daysPerWeek}
+                value={job.monthlyCommutingAllowance}
                 onChange={(e) =>
-                  updateJob(job.id, { daysPerWeek: Number(e.target.value) })
-                }
-                className="rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1"
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-xs text-secondary">
-              1日の勤務時間
-              <input
-                type="number"
-                min={0}
-                max={24}
-                step={0.5}
-                value={job.hoursPerDay}
-                onChange={(e) =>
-                  updateJob(job.id, { hoursPerDay: Number(e.target.value) })
+                  updateJob(job.id, { monthlyCommutingAllowance: Number(e.target.value) })
                 }
                 className="rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1"
               />
@@ -120,6 +109,43 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
                   </option>
                 ))}
               </select>
+            </label>
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label className="flex flex-col gap-1 text-xs text-secondary">
+              <span className="flex items-center justify-between">
+                週の勤務日数
+                <span className="font-medium text-primary">{job.daysPerWeek}日</span>
+              </span>
+              <input
+                type="range"
+                min={0}
+                max={7}
+                step={0.5}
+                value={job.daysPerWeek}
+                onChange={(e) =>
+                  updateJob(job.id, { daysPerWeek: Number(e.target.value) })
+                }
+                className={sliderClass}
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-secondary">
+              <span className="flex items-center justify-between">
+                1日の勤務時間
+                <span className="font-medium text-primary">{job.hoursPerDay}時間</span>
+              </span>
+              <input
+                type="range"
+                min={0}
+                max={12}
+                step={0.5}
+                value={job.hoursPerDay}
+                onChange={(e) =>
+                  updateJob(job.id, { hoursPerDay: Number(e.target.value) })
+                }
+                className={sliderClass}
+              />
             </label>
           </div>
         </div>

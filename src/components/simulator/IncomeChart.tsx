@@ -2,6 +2,7 @@
 
 import {
   CartesianGrid,
+  Legend,
   Line,
   LineChart,
   ReferenceLine,
@@ -13,18 +14,18 @@ import {
 import type { WallStatus } from "@/lib/types";
 import { formatYen } from "@/lib/format";
 
-interface IncomeChartProps {
+export interface IncomeSeries {
+  key: string;
+  label: string;
   cumulative: number[]; // 12ヶ月分
-  walls: WallStatus[];
-  overallStatus: WallStatus["status"];
-  targetYear: number;
+  color: string;
 }
 
-const LINE_COLOR: Record<WallStatus["status"], string> = {
-  good: "var(--status-good)",
-  warning: "var(--status-warning)",
-  critical: "var(--status-critical)",
-};
+interface IncomeChartProps {
+  series: IncomeSeries[];
+  walls: WallStatus[];
+  targetYear: number;
+}
 
 function ChartTooltip({
   active,
@@ -32,20 +33,30 @@ function ChartTooltip({
   label,
 }: {
   active?: boolean;
-  payload?: { value: number }[];
+  payload?: { value: number; name: string; color?: string }[];
   label?: string | number;
 }) {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded border border-(--border-hairline) bg-surface px-3 py-2 text-xs shadow-sm">
       <div className="text-muted">{label}月</div>
-      <div className="font-medium text-primary">{formatYen(payload[0].value)}</div>
+      {payload.map((p) => (
+        <div key={p.name} className="flex items-center gap-1.5">
+          <span className="inline-block h-2 w-2 rounded-full" style={{ background: p.color }} />
+          <span className="text-secondary">{p.name}:</span>
+          <span className="font-medium text-primary">{formatYen(p.value)}</span>
+        </div>
+      ))}
     </div>
   );
 }
 
-export function IncomeChart({ cumulative, walls, overallStatus, targetYear }: IncomeChartProps) {
-  const data = cumulative.map((value, index) => ({ month: index + 1, income: value }));
+export function IncomeChart({ series, walls, targetYear }: IncomeChartProps) {
+  const data = Array.from({ length: 12 }, (_, i) => {
+    const row: Record<string, number> = { month: i + 1 };
+    for (const s of series) row[s.key] = s.cumulative[i];
+    return row;
+  });
 
   return (
     <div className="rounded-lg border border-(--border-hairline) bg-surface p-4">
@@ -69,6 +80,12 @@ export function IncomeChart({ cumulative, walls, overallStatus, targetYear }: In
               width={48}
             />
             <Tooltip content={<ChartTooltip />} />
+            {series.length > 1 && (
+              <Legend
+                wrapperStyle={{ fontSize: 12, color: "var(--text-secondary)" }}
+                iconType="circle"
+              />
+            )}
             {walls.map((w) => (
               <ReferenceLine
                 key={w.wall.key}
@@ -83,14 +100,18 @@ export function IncomeChart({ cumulative, walls, overallStatus, targetYear }: In
                 }}
               />
             ))}
-            <Line
-              type="monotone"
-              dataKey="income"
-              stroke={LINE_COLOR[overallStatus]}
-              strokeWidth={2}
-              dot={{ r: 3, fill: LINE_COLOR[overallStatus], stroke: "var(--surface-1)", strokeWidth: 2 }}
-              activeDot={{ r: 5 }}
-            />
+            {series.map((s) => (
+              <Line
+                key={s.key}
+                type="monotone"
+                dataKey={s.key}
+                name={s.label}
+                stroke={s.color}
+                strokeWidth={2}
+                dot={{ r: 3, fill: s.color, stroke: "var(--surface-1)", strokeWidth: 2 }}
+                activeDot={{ r: 5 }}
+              />
+            ))}
           </LineChart>
         </ResponsiveContainer>
       </div>

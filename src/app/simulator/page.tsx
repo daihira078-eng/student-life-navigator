@@ -5,7 +5,7 @@ import Link from "next/link";
 import { JobForm } from "@/components/simulator/JobForm";
 import { ProfileForm } from "@/components/simulator/ProfileForm";
 import { WallGauge } from "@/components/simulator/WallGauge";
-import { IncomeChart } from "@/components/simulator/IncomeChart";
+import { IncomeChart, type IncomeSeries } from "@/components/simulator/IncomeChart";
 import { cumulativeByMonth, evaluateWalls } from "@/lib/wallCalculator";
 import type { DependencyProfile, Job } from "@/lib/types";
 
@@ -17,6 +17,7 @@ const DEFAULT_JOBS: Job[] = [
     daysPerWeek: 2.5,
     hoursPerDay: 4,
     startMonth: 4,
+    monthlyCommutingAllowance: 0,
   },
   {
     id: "job-vexum",
@@ -25,6 +26,7 @@ const DEFAULT_JOBS: Job[] = [
     daysPerWeek: 1,
     hoursPerDay: 3.5,
     startMonth: 8,
+    monthlyCommutingAllowance: 0,
   },
 ];
 
@@ -34,17 +36,31 @@ const DEFAULT_PROFILE: DependencyProfile = {
   targetYear: new Date().getFullYear(),
 };
 
+const SERIES_LABEL: Record<string, string> = {
+  incomeTax: "所得税ベースの収入（通勤手当を除く）",
+  socialInsurance: "社会保険ベースの収入（通勤手当を含む）",
+};
+
+const SERIES_COLOR: Record<string, string> = {
+  incomeTax: "var(--series-1)",
+  socialInsurance: "var(--series-6)",
+};
+
 export default function SimulatorPage() {
   const [jobs, setJobs] = useState<Job[]>(DEFAULT_JOBS);
   const [profile, setProfile] = useState<DependencyProfile>(DEFAULT_PROFILE);
 
   const walls = useMemo(() => evaluateWalls(jobs, profile), [jobs, profile]);
-  const cumulative = useMemo(() => cumulativeByMonth(jobs), [jobs]);
-  const overallStatus = walls.some((w) => w.status === "critical")
-    ? "critical"
-    : walls.some((w) => w.status === "warning")
-      ? "warning"
-      : "good";
+  const series: IncomeSeries[] = useMemo(
+    () =>
+      walls.map((w) => ({
+        key: w.wall.key,
+        label: SERIES_LABEL[w.wall.key],
+        cumulative: cumulativeByMonth(jobs, w.wall.key),
+        color: SERIES_COLOR[w.wall.key],
+      })),
+    [jobs, walls],
+  );
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-10">
@@ -56,7 +72,7 @@ export default function SimulatorPage() {
           マルチジョブ扶養最適化シミュレーター
         </h1>
         <p className="mt-1 text-sm text-secondary">
-          複数バイトの時給・シフト・開始月を入力すると、123万円の壁・社会保険の壁までの残り稼働可能時間と、超えた場合の負担額の目安を横断で確認できます。入力内容はブラウザ内だけで計算され、サーバーには送信されません。
+          複数バイトの時給・シフト・開始月を入力すると、123万円の壁・社会保険の壁までの残り稼働可能時間と、超えた場合の負担額の目安を横断で確認できます。通勤手当は所得税の壁では非課税(除外)、社会保険の壁では収入に含めて計算します。入力内容はブラウザ内だけで計算され、サーバーには送信されません。
         </p>
       </div>
 
@@ -75,12 +91,7 @@ export default function SimulatorPage() {
           {walls.map((status) => (
             <WallGauge key={status.wall.key} status={status} />
           ))}
-          <IncomeChart
-            cumulative={cumulative}
-            walls={walls}
-            overallStatus={overallStatus}
-            targetYear={profile.targetYear}
-          />
+          <IncomeChart series={series} walls={walls} targetYear={profile.targetYear} />
         </div>
       </div>
     </main>

@@ -14,8 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "一人暮らし新生活 総合最適化ナビ",
-  description:
-    "複数バイト×扶養の壁×経済圏を横断して最適化する、一人称の意思決定シミュレーター",
+  description: "複数バイト×扶養の壁を横断して最適化する、一人称の意思決定シミュレーター",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
