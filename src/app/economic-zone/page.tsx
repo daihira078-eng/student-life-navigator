@@ -33,6 +33,7 @@ const DEFAULT_INPUT: EconomicZoneInput = {
 
 export default function EconomicZonePage() {
   const [input, setInput] = useState<EconomicZoneInput>(DEFAULT_INPUT);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   const results = useMemo(() => diagnoseEconomicZone(input), [input]);
   const totalSaving = useMemo(() => totalAnnualSavingPotential(results), [results]);
@@ -43,7 +44,7 @@ export default function EconomicZonePage() {
   const monthlyFixedCost = totalMonthlyFixedCost(input.fixedCosts);
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-10">
+    <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-10">
       <div>
         <Link href="/" className="text-sm text-muted hover:text-series-1">
           ← トップに戻る
@@ -56,23 +57,34 @@ export default function EconomicZonePage() {
         </p>
       </div>
 
-      <div className="rounded-lg border border-(--border-hairline) bg-surface p-4">
-        <div className="text-xs text-muted">年間の差額（合計、データがある項目のみ）</div>
-        <div className="mt-1 text-3xl font-semibold text-status-good">
-          {formatYen(totalSaving)}
-        </div>
-      </div>
+      {!hasSubmitted && (
+        <>
+          <div className="flex flex-col gap-4">
+            <EconomicZoneForm input={input} onChange={setInput} />
+            <FixedCostForm
+              fixedCosts={input.fixedCosts}
+              onChange={(fixedCosts) => setInput({ ...input, fixedCosts })}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => setHasSubmitted(true)}
+            className="self-center rounded-full bg-series-1 px-8 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+          >
+            診断する
+          </button>
+        </>
+      )}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      {hasSubmitted && (
         <div className="flex flex-col gap-4">
-          <EconomicZoneForm input={input} onChange={setInput} />
-          <FixedCostForm
-            fixedCosts={input.fixedCosts}
-            onChange={(fixedCosts) => setInput({ ...input, fixedCosts })}
-          />
-        </div>
+          <div className="rounded-lg border border-(--border-hairline) bg-surface p-4">
+            <div className="text-xs text-muted">年間の差額（合計、データがある項目のみ）</div>
+            <div className="mt-1 text-3xl font-semibold text-status-good">
+              {formatYen(totalSaving)}
+            </div>
+          </div>
 
-        <div className="flex flex-col gap-4">
           {results.map((result) => (
             <DiagnosisCard key={result.category} result={result} />
           ))}
@@ -91,14 +103,24 @@ export default function EconomicZonePage() {
               >
                 <span className="font-medium text-primary">{tip.costName}: </span>
                 <span className="text-secondary">{tip.message}</span>
-                <span className="ml-1 font-medium text-status-good">
-                  （年間 {formatYen(tip.annualSaving)}）
-                </span>
+                {tip.annualSaving > 0 && (
+                  <span className="ml-1 font-medium text-status-good">
+                    （年間 {formatYen(tip.annualSaving)}）
+                  </span>
+                )}
               </div>
             ))}
           </div>
+
+          <button
+            type="button"
+            onClick={() => setHasSubmitted(false)}
+            className="self-center rounded-full border border-(--border-hairline) px-6 py-2.5 text-sm font-medium text-secondary transition-opacity hover:opacity-80"
+          >
+            入力を修正する
+          </button>
         </div>
-      </div>
+      )}
     </main>
   );
 }
