@@ -17,6 +17,12 @@ export default function Home() {
         >
           扶養最適化シミュレーターを開く
         </Link>
+        <Link
+          href="/economic-zone"
+          className="rounded-full border border-(--border-hairline) px-5 py-2.5 text-sm font-medium text-primary transition-opacity hover:opacity-80"
+        >
+          経済圏・固定費診断を開く
+        </Link>
       </div>
     </main>
   );

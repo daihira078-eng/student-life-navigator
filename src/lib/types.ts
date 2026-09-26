@@ -41,3 +41,37 @@ export interface WallStatus {
   excessImpact: ExcessImpact | null;
   shiftSuggestion: ShiftSuggestion | null;
 }
+
+export interface FixedCost {
+  id: string;
+  name: string;
+  monthlyAmount: number;
+}
+
+export interface EconomicZoneInput {
+  usesRakutenCard: boolean;
+  monthlyCardSpend: number;
+  usesRakutenNisa: boolean;
+  nisaBalance: number;
+  usesRakutenMobile: boolean;
+  currentTelecomMonthlyFee: number | null; // 不明なら null
+  usesRakutenBank: boolean;
+  fixedCosts: FixedCost[];
+}
+
+export interface DiagnosisResult {
+  category: "card" | "nisa" | "telecom" | "bank";
+  label: string;
+  currentLabel: string;
+  recommendedLabel: string;
+  annualDiff: number | null; // nullは試算不可(定性コメントのみ)
+  note: string;
+  sourceNote: string;
+}
+
+export interface SubscriptionTip {
+  costId: string;
+  costName: string;
+  message: string;
+  annualSaving: number;
+}
