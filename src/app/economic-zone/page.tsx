@@ -55,6 +55,10 @@ export default function EconomicZonePage() {
         <p className="mt-1 text-sm text-secondary">
           現在契約中の銀行・カード・通信・NISAを入力すると、開発者が実際に乗り換えた楽天経済圏との年間差額を試算します。他の選択肢（PayPayカード等）は含まれておらず、万人への「推奨」ではなく個人的な比較の記録です。入力内容はブラウザ内だけで計算され、サーバーには送信されません。
         </p>
+        <p className="mt-2 rounded-md border border-dashed border-(--border-hairline) p-2 text-xs text-muted">
+          ⚠️
+          還元率・料金は各社が随時改定するため、ここに表示される数値は2026年9月時点のスナップショットです。開発者が一度きり行った経済圏の棚卸しの記録として作っており、継続的な自動更新はしていません。最新情報は各サービスの公式サイトでご確認ください。
+        </p>
       </div>
 
       {!hasSubmitted && (
