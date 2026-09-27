@@ -1,6 +1,7 @@
 "use client";
 
 import type { Job } from "@/lib/types";
+import { selectOnFocus } from "@/lib/selectOnFocus";
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 
@@ -82,6 +83,7 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
                 onChange={(e) =>
                   updateJob(job.id, { hourlyWage: Number(e.target.value) })
                 }
+                onFocus={selectOnFocus}
                 className="rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1"
               />
             </label>
@@ -94,6 +96,7 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
                 onChange={(e) =>
                   updateJob(job.id, { monthlyCommutingAllowance: Number(e.target.value) })
                 }
+                onFocus={selectOnFocus}
                 className="rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1"
               />
             </label>

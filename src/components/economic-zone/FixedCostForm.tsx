@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { FixedCost } from "@/lib/types";
 import { SUBSCRIPTION_CATALOG } from "@/lib/subscriptionCatalog";
+import { selectOnFocus } from "@/lib/selectOnFocus";
 
 export function createEmptyFixedCost(): FixedCost {
   return { id: `cost-${crypto.randomUUID()}`, name: "", monthlyAmount: 0, frequency: "weekly" };
@@ -126,6 +127,7 @@ export function FixedCostForm({ fixedCosts, onChange }: FixedCostFormProps) {
               min={0}
               value={cost.monthlyAmount}
               onChange={(e) => update(cost.id, { monthlyAmount: Number(e.target.value) })}
+              onFocus={selectOnFocus}
               className="w-28 rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1"
             />
             <span className="text-xs text-muted">円/月</span>

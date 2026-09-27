@@ -2,6 +2,7 @@
 
 import type { DependencyProfile } from "@/lib/types";
 import { isSpecificDependentAge } from "@/lib/wallCalculator";
+import { selectOnFocus } from "@/lib/selectOnFocus";
 
 interface ProfileFormProps {
   profile: DependencyProfile;
@@ -40,6 +41,7 @@ export function ProfileForm({ profile, onChange }: ProfileFormProps) {
             max={30}
             value={profile.currentAge}
             onChange={(e) => onChange({ ...profile, currentAge: Number(e.target.value) })}
+            onFocus={selectOnFocus}
             className="w-20 rounded border border-(--border-hairline) bg-transparent px-2 py-1 text-primary"
           />
         </label>

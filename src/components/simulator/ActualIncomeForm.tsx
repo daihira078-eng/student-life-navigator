@@ -1,6 +1,7 @@
 "use client";
 
 import type { ActualIncomeRecord } from "@/lib/actualIncomeData";
+import { selectOnFocus } from "@/lib/selectOnFocus";
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 
@@ -48,6 +49,7 @@ export function ActualIncomeForm({ records, onChange }: ActualIncomeFormProps) {
               min={0}
               value={record.amount}
               onChange={(e) => update(index, { amount: Number(e.target.value) })}
+              onFocus={selectOnFocus}
               className="w-32 rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1"
             />
             <span className="text-xs text-muted">円（給料のみ）</span>

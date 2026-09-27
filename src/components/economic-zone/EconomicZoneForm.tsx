@@ -1,6 +1,7 @@
 "use client";
 
 import type { EconomicZoneInput } from "@/lib/types";
+import { selectOnFocus } from "@/lib/selectOnFocus";
 
 interface EconomicZoneFormProps {
   input: EconomicZoneInput;
@@ -43,6 +44,7 @@ export function EconomicZoneForm({ input, onChange }: EconomicZoneFormProps) {
             min={0}
             value={input.monthlyCardSpend}
             onChange={(e) => set("monthlyCardSpend", Number(e.target.value))}
+            onFocus={selectOnFocus}
             className={numberInputClass}
           />
         </label>
@@ -88,6 +90,7 @@ export function EconomicZoneForm({ input, onChange }: EconomicZoneFormProps) {
             min={0}
             value={input.nisaBalance}
             onChange={(e) => set("nisaBalance", Number(e.target.value))}
+            onFocus={selectOnFocus}
             className={numberInputClass}
           />
         </label>
@@ -123,6 +126,7 @@ export function EconomicZoneForm({ input, onChange }: EconomicZoneFormProps) {
                 e.target.value === "" ? null : Number(e.target.value),
               )
             }
+            onFocus={selectOnFocus}
             className={numberInputClass}
           />
         </label>
