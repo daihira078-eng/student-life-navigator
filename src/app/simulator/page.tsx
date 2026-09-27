@@ -10,6 +10,7 @@ import { ScenarioForm } from "@/components/simulator/ScenarioForm";
 import { ScenarioComparisonTable } from "@/components/simulator/ScenarioComparisonTable";
 import { ActualComparisonChart } from "@/components/simulator/ActualComparisonChart";
 import { ActualIncomeForm } from "@/components/simulator/ActualIncomeForm";
+import { ShareCard } from "@/components/simulator/ShareCard";
 import { cumulativeByMonth, evaluateWalls, getWalls } from "@/lib/wallCalculator";
 import { useLocalStorageState } from "@/lib/useLocalStorageState";
 import { ACTUAL_INCOME_2026, type ActualIncomeRecord } from "@/lib/actualIncomeData";
@@ -177,6 +178,7 @@ export default function SimulatorPage() {
             <WallGauge key={status.wall.key} status={status} />
           ))}
           <IncomeChart series={series} walls={walls} targetYear={profile.targetYear} />
+          {walls.length > 0 && <ShareCard walls={walls} targetYear={profile.targetYear} />}
         </div>
       </div>
 
