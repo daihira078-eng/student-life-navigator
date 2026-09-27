@@ -1,5 +1,8 @@
+"use client";
+
 import type { WallStatus } from "@/lib/types";
 import { formatHours, formatYen } from "@/lib/format";
+import { useAnimatedNumber } from "@/lib/useAnimatedNumber";
 
 const STATUS_COLOR: Record<WallStatus["status"], string> = {
   good: "var(--status-good)",
@@ -21,6 +24,9 @@ const STATUS_LABEL: Record<WallStatus["status"], string> = {
 
 export function WallGauge({ status }: { status: WallStatus }) {
   const ratio = Math.min(1, status.annualProjection / status.wall.threshold);
+  const animatedAnnualProjection = useAnimatedNumber(status.annualProjection);
+  const animatedRemainingAmount = useAnimatedNumber(Math.max(0, status.remainingAmount));
+  const animatedRemainingHours = useAnimatedNumber(Math.max(0, status.remainingHours));
 
   return (
     <div className="rounded-lg border border-(--border-hairline) bg-surface p-4">
@@ -29,16 +35,19 @@ export function WallGauge({ status }: { status: WallStatus }) {
           {status.wall.label}
         </span>
         <span
-          className="rounded-full px-2 py-0.5 text-xs font-medium"
+          className={`rounded-full px-2 py-0.5 text-xs font-medium transition-colors duration-500 ${status.status === "critical" ? "animate-pulse" : ""}`}
           style={{ color: STATUS_COLOR[status.status], background: STATUS_TRACK[status.status] }}
         >
           {STATUS_LABEL[status.status]}
         </span>
       </div>
 
-      <div className="mt-3 h-2 w-full overflow-hidden rounded-full" style={{ background: STATUS_TRACK[status.status] }}>
+      <div
+        className="mt-3 h-2 w-full overflow-hidden rounded-full transition-colors duration-500"
+        style={{ background: STATUS_TRACK[status.status] }}
+      >
         <div
-          className="h-full rounded-full transition-[width]"
+          className={`h-full rounded-full transition-[width,background-color] duration-500 ease-out ${status.status === "critical" ? "animate-pulse" : ""}`}
           style={{ width: `${ratio * 100}%`, background: STATUS_COLOR[status.status] }}
         />
       </div>
@@ -46,18 +55,20 @@ export function WallGauge({ status }: { status: WallStatus }) {
       <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
         <div>
           <div className="text-xs text-muted">年間見込み</div>
-          <div className="font-medium text-primary">{formatYen(status.annualProjection)}</div>
+          <div className="font-medium text-primary tabular-nums">
+            {formatYen(animatedAnnualProjection)}
+          </div>
         </div>
         <div>
           <div className="text-xs text-muted">壁まで残り</div>
-          <div className="font-medium text-primary">
-            {status.remainingAmount > 0 ? formatYen(status.remainingAmount) : "超過"}
+          <div className="font-medium text-primary tabular-nums">
+            {status.remainingAmount > 0 ? formatYen(animatedRemainingAmount) : "超過"}
           </div>
         </div>
         <div>
           <div className="text-xs text-muted">あと働ける時間</div>
-          <div className="font-medium text-primary">
-            {status.remainingAmount > 0 ? formatHours(status.remainingHours) : "0時間"}
+          <div className="font-medium text-primary tabular-nums">
+            {status.remainingAmount > 0 ? formatHours(animatedRemainingHours) : "0時間"}
           </div>
         </div>
         <div>
