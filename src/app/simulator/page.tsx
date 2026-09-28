@@ -11,6 +11,7 @@ import { ScenarioComparisonTable } from "@/components/simulator/ScenarioComparis
 import { ActualComparisonChart } from "@/components/simulator/ActualComparisonChart";
 import { ActualIncomeForm } from "@/components/simulator/ActualIncomeForm";
 import { PageTabs } from "@/components/simulator/PageTabs";
+import { DataPortability } from "@/components/simulator/DataPortability";
 import { cumulativeByMonth, evaluateWalls, getWalls } from "@/lib/wallCalculator";
 import { useLocalStorageState } from "@/lib/useLocalStorageState";
 import { ACTUAL_INCOME_2026, type ActualIncomeRecord } from "@/lib/actualIncomeData";
@@ -147,6 +148,18 @@ export default function SimulatorPage() {
     setActualIncome(ACTUAL_INCOME_2026);
   }
 
+  function handleImport(data: {
+    jobs: Job[];
+    profile: DependencyProfile;
+    extraScenarios: Scenario[];
+    actualIncome: ActualIncomeRecord[];
+  }) {
+    setJobs(data.jobs);
+    setProfile(data.profile);
+    setExtraScenarios(data.extraScenarios);
+    setActualIncome(data.actualIncome);
+  }
+
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-10">
       <div>
@@ -154,13 +167,25 @@ export default function SimulatorPage() {
           <Link href="/" className="text-sm text-muted hover:text-series-1">
             ← トップに戻る
           </Link>
-          <button
-            type="button"
-            onClick={resetToDefaults}
-            className="text-xs text-muted hover:text-status-critical"
-          >
-            入力を初期値に戻す
-          </button>
+          <div className="flex items-center gap-3">
+            <DataPortability
+              jobs={jobs}
+              profile={profile}
+              extraScenarios={extraScenarios}
+              actualIncome={actualIncome}
+              onImport={handleImport}
+            />
+            <span aria-hidden className="text-xs text-muted">
+              /
+            </span>
+            <button
+              type="button"
+              onClick={resetToDefaults}
+              className="text-xs text-muted hover:text-status-critical"
+            >
+              入力を初期値に戻す
+            </button>
+          </div>
         </div>
         <h1 className="mt-2 text-2xl font-semibold text-primary">
           マルチジョブ扶養最適化シミュレーター
