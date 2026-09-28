@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { WallStatus } from "@/lib/types";
 import { formatHours, formatYen } from "@/lib/format";
+import { generateAdvice } from "@/lib/adviceGenerator";
 import { AnimatedRing } from "./AnimatedRing";
 
 const WALL_ACCENT: Record<string, string> = {
@@ -89,6 +90,7 @@ export function WallStatusPanel({ walls }: { walls: WallStatus[] }) {
   }
 
   const jobColors = buildJobColorMap(walls);
+  const advice = generateAdvice(walls);
 
   const cells = walls.flatMap((w) => [
     {
@@ -148,6 +150,21 @@ export function WallStatusPanel({ walls }: { walls: WallStatus[] }) {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {advice && (
+        <div
+          className="mt-5 rounded-md border px-4 py-3 text-sm text-primary"
+          style={{
+            background: `color-mix(in oklab, ${STATUS_COLOR[advice.status]} 10%, var(--surface-1))`,
+            borderColor: `color-mix(in oklab, ${STATUS_COLOR[advice.status]} 35%, var(--gridline))`,
+          }}
+        >
+          <span className="font-semibold" style={{ color: STATUS_COLOR[advice.status] }}>
+            ひとことアドバイス:{" "}
+          </span>
+          {advice.message}
         </div>
       )}
 
