@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import type { WallStatus } from "@/lib/types";
 import { formatHours, formatYen } from "@/lib/format";
 import { AnimatedRing } from "./AnimatedRing";
@@ -19,6 +22,12 @@ const STATUS_LABEL: Record<WallStatus["status"], string> = {
   critical: "壁を超える見込み",
 };
 
+/** KPIセルの見出しは短くし、詳しい説明(19-23歳向け等)はリング側のラベルに残す */
+function shortWallLabel(wall: WallStatus["wall"]): string {
+  const man = Math.round(wall.threshold / 10000);
+  return `${man}万円の壁`;
+}
+
 function KpiCell({
   label,
   value,
@@ -27,18 +36,25 @@ function KpiCell({
 }: {
   label: string;
   value: string;
-  sub?: string;
+  sub: string;
   accent: string;
 }) {
+  const [expanded, setExpanded] = useState(false);
   return (
-    <div
-      className="border-r border-b border-(--gridline) px-4 py-3 last:border-r-0"
+    <button
+      type="button"
+      onClick={() => setExpanded((e) => !e)}
+      className="border-r border-b border-(--gridline) px-4 py-3 text-left last:border-r-0"
       style={{ borderTop: `3px solid ${accent}` }}
     >
       <div className="text-xs text-muted">{label}</div>
       <div className="text-xl font-bold text-primary tabular-nums">{value}</div>
-      {sub && <div className="mt-1 text-xs text-muted">{sub}</div>}
-    </div>
+      {expanded ? (
+        <div className="mt-1 text-xs text-muted">{sub}</div>
+      ) : (
+        <div className="mt-1 text-xs text-muted underline decoration-dotted">詳細を見る</div>
+      )}
+    </button>
   );
 }
 
@@ -54,7 +70,7 @@ export function WallStatusPanel({ walls }: { walls: WallStatus[] }) {
   const cells = walls.flatMap((w) => [
     {
       key: `${w.wall.key}-usage`,
-      label: `${w.wall.label} 使用率`,
+      label: `${shortWallLabel(w.wall)} 使用率`,
       value: `${Math.round(Math.min(1, w.annualProjection / w.wall.threshold) * 100)}%`,
       sub: `${formatYen(w.annualProjection)} / ${formatYen(w.wall.threshold)}`,
       accent: WALL_ACCENT[w.wall.key] ?? "var(--gridline)",
