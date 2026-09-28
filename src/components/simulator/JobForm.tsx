@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { Job } from "@/lib/types";
 import { selectOnFocus } from "@/lib/selectOnFocus";
 
@@ -27,8 +28,12 @@ interface JobFormProps {
 }
 
 const sliderClass = "h-2 w-full cursor-pointer accent-[var(--series-1)]";
+const fieldClass =
+  "rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1";
 
 export function JobForm({ jobs, onChange }: JobFormProps) {
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+
   function updateJob(id: string, patch: Partial<Job>) {
     onChange(jobs.map((job) => (job.id === id ? { ...job, ...patch } : job)));
   }
@@ -41,140 +46,164 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
     onChange([...jobs, createEmptyJob()]);
   }
 
+  function toggleExpanded(id: string) {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
   return (
     <div className="flex flex-col gap-4">
-      {jobs.map((job, index) => (
-        <div
-          key={job.id}
-          className="rounded-lg border border-(--border-hairline) bg-surface p-4"
-        >
-          <div className="mb-3 flex items-center justify-between">
-            <span className="text-sm font-semibold text-secondary">
-              バイト{index + 1}
-            </span>
-            {jobs.length > 1 && (
-              <button
-                type="button"
-                onClick={() => removeJob(job.id)}
-                className="text-sm text-muted hover:text-status-critical"
-              >
-                削除
-              </button>
+      {jobs.map((job, index) => {
+        const expanded = expandedIds.has(job.id);
+        return (
+          <div
+            key={job.id}
+            className="rounded-lg border border-(--border-hairline) bg-surface p-4"
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-sm font-semibold text-secondary">
+                {job.name || `バイト${index + 1}`}
+              </span>
+              {jobs.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeJob(job.id)}
+                  className="text-sm text-muted hover:text-status-critical"
+                >
+                  削除
+                </button>
+              )}
+            </div>
+
+            {/* 必須: これだけで計算が成立する最小セット */}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <label className="flex flex-col gap-1 text-xs text-secondary">
+                時給（円）
+                <input
+                  type="number"
+                  min={0}
+                  value={job.hourlyWage}
+                  onChange={(e) =>
+                    updateJob(job.id, { hourlyWage: Number(e.target.value) })
+                  }
+                  onFocus={selectOnFocus}
+                  className={fieldClass}
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-xs text-secondary">
+                <span className="flex items-center justify-between">
+                  週の勤務日数
+                  <span className="font-medium text-primary">{job.daysPerWeek}日</span>
+                </span>
+                <input
+                  type="range"
+                  min={0}
+                  max={7}
+                  step={0.5}
+                  value={job.daysPerWeek}
+                  onChange={(e) =>
+                    updateJob(job.id, { daysPerWeek: Number(e.target.value) })
+                  }
+                  className={`${sliderClass} mt-2`}
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-xs text-secondary">
+                <span className="flex items-center justify-between">
+                  1日の勤務時間
+                  <span className="font-medium text-primary">{job.hoursPerDay}時間</span>
+                </span>
+                <input
+                  type="range"
+                  min={0}
+                  max={12}
+                  step={0.5}
+                  value={job.hoursPerDay}
+                  onChange={(e) =>
+                    updateJob(job.id, { hoursPerDay: Number(e.target.value) })
+                  }
+                  className={`${sliderClass} mt-2`}
+                />
+              </label>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => toggleExpanded(job.id)}
+              className="mt-3 text-xs font-medium text-series-1 hover:opacity-80"
+            >
+              {expanded ? "− 詳しい設定を閉じる" : "+ もっと詳しく入力する（名前・通勤手当・期間）"}
+            </button>
+
+            {/* 推奨: 精度を上げるための追加項目 */}
+            {expanded && (
+              <div className="mt-3 grid grid-cols-2 gap-3 border-t border-(--border-hairline) pt-3 sm:grid-cols-4">
+                <label className="flex flex-col gap-1 text-xs text-secondary">
+                  バイト名
+                  <input
+                    type="text"
+                    value={job.name}
+                    onChange={(e) => updateJob(job.id, { name: e.target.value })}
+                    placeholder="例: CAZAN珈琲店"
+                    className={fieldClass}
+                  />
+                </label>
+                <label className="flex flex-col gap-1 text-xs text-secondary">
+                  通勤手当（円/月）
+                  <input
+                    type="number"
+                    min={0}
+                    value={job.monthlyCommutingAllowance}
+                    onChange={(e) =>
+                      updateJob(job.id, { monthlyCommutingAllowance: Number(e.target.value) })
+                    }
+                    onFocus={selectOnFocus}
+                    className={fieldClass}
+                  />
+                </label>
+                <label className="flex flex-col gap-1 text-xs text-secondary">
+                  開始月
+                  <select
+                    value={job.startMonth}
+                    onChange={(e) =>
+                      updateJob(job.id, { startMonth: Number(e.target.value) })
+                    }
+                    className={fieldClass}
+                  >
+                    {MONTHS.map((m) => (
+                      <option key={m} value={m}>
+                        {m}月〜
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="flex flex-col gap-1 text-xs text-secondary">
+                  終了月
+                  <select
+                    value={job.endMonth ?? "none"}
+                    onChange={(e) =>
+                      updateJob(job.id, {
+                        endMonth: e.target.value === "none" ? null : Number(e.target.value),
+                      })
+                    }
+                    className={fieldClass}
+                  >
+                    <option value="none">継続中</option>
+                    {MONTHS.map((m) => (
+                      <option key={m} value={m}>
+                        〜{m}月
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
             )}
           </div>
-
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-            <label className="flex flex-col gap-1 text-xs text-secondary">
-              バイト名
-              <input
-                type="text"
-                value={job.name}
-                onChange={(e) => updateJob(job.id, { name: e.target.value })}
-                placeholder="例: CAZAN珈琲店"
-                className="rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1"
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-xs text-secondary">
-              時給（円）
-              <input
-                type="number"
-                min={0}
-                value={job.hourlyWage}
-                onChange={(e) =>
-                  updateJob(job.id, { hourlyWage: Number(e.target.value) })
-                }
-                onFocus={selectOnFocus}
-                className="rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1"
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-xs text-secondary">
-              通勤手当（円/月）
-              <input
-                type="number"
-                min={0}
-                value={job.monthlyCommutingAllowance}
-                onChange={(e) =>
-                  updateJob(job.id, { monthlyCommutingAllowance: Number(e.target.value) })
-                }
-                onFocus={selectOnFocus}
-                className="rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1"
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-xs text-secondary">
-              開始月
-              <select
-                value={job.startMonth}
-                onChange={(e) =>
-                  updateJob(job.id, { startMonth: Number(e.target.value) })
-                }
-                className="rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1"
-              >
-                {MONTHS.map((m) => (
-                  <option key={m} value={m}>
-                    {m}月〜
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="flex flex-col gap-1 text-xs text-secondary">
-              終了月
-              <select
-                value={job.endMonth ?? "none"}
-                onChange={(e) =>
-                  updateJob(job.id, {
-                    endMonth: e.target.value === "none" ? null : Number(e.target.value),
-                  })
-                }
-                className="rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1"
-              >
-                <option value="none">継続中</option>
-                {MONTHS.map((m) => (
-                  <option key={m} value={m}>
-                    〜{m}月
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <label className="flex flex-col gap-1 text-xs text-secondary">
-              <span className="flex items-center justify-between">
-                週の勤務日数
-                <span className="font-medium text-primary">{job.daysPerWeek}日</span>
-              </span>
-              <input
-                type="range"
-                min={0}
-                max={7}
-                step={0.5}
-                value={job.daysPerWeek}
-                onChange={(e) =>
-                  updateJob(job.id, { daysPerWeek: Number(e.target.value) })
-                }
-                className={sliderClass}
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-xs text-secondary">
-              <span className="flex items-center justify-between">
-                1日の勤務時間
-                <span className="font-medium text-primary">{job.hoursPerDay}時間</span>
-              </span>
-              <input
-                type="range"
-                min={0}
-                max={12}
-                step={0.5}
-                value={job.hoursPerDay}
-                onChange={(e) =>
-                  updateJob(job.id, { hoursPerDay: Number(e.target.value) })
-                }
-                className={sliderClass}
-              />
-            </label>
-          </div>
-        </div>
-      ))}
+        );
+      })}
       <button
         type="button"
         onClick={addJob}
