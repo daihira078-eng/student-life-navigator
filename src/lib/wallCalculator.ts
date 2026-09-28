@@ -131,44 +131,10 @@ function statusOf(annualProjection: number, threshold: number): WallStatus["stat
 }
 
 /**
- * 概算値。所得税は課税所得の最低税率区分(5%)、住民税は一律10%として超過分に掛けて試算。
- * 実際の税額は各種控除の適用状況によって変わるため、あくまで目安として表示する。
- * 社会保険の壁は「税」ではなく、扶養から外れて自分で保険料を払う崖なので別ロジック。
+ * 年間寄与額が最大のバイトを、シフト調整や実感換算の基準として選ぶ。
+ * そのバイトの時間を調整するのが最も効果が大きいため。
  */
-function estimateExcessImpact(wall: WallDefinition, annualProjection: number): ExcessImpact | null {
-  const excess = annualProjection - wall.threshold;
-  if (excess <= 0) return null;
-
-  if (wall.key === "incomeTax") {
-    const amount = excess * 0.05 + excess * 0.1;
-    return {
-      label: "税負担の目安（所得税+住民税）",
-      amount,
-      note: "超過分に所得税5%+住民税10%をかけた概算です。実際の税額は各種控除の適用状況で変わります",
-    };
-  }
-
-  // socialInsurance: 壁を超えると扶養から外れ、収入全体に対して自分で保険料を払う必要が生じる
-  return {
-    label: "扶養を外れた場合の社会保険料の目安（年間）",
-    amount: 190_000,
-    note: "壁を境に段階的な負担ではなく、扶養から外れた分そのまま自己負担が発生する『崖』です。金額は年収130万円前後の一般的な目安であり、勤務先の加入状況により変わります",
-  };
-}
-
-/**
- * 壁を超える見込みの場合、年間寄与額が最大のバイトを対象に、
- * 週の勤務時間をどれだけ減らせば壁以内に収まるかを逆算する。
- * 寄与額が最大のバイトを選ぶのは、そのバイトの時間を調整するのが最も効果が大きいため。
- * 通勤手当は勤務時間を減らしても変わらない前提のため、削減額は時給部分のみで逆算する。
- */
-function suggestShiftReduction(
-  jobs: Job[],
-  excess: number,
-  wallKey: WallDefinition["key"],
-): ShiftSuggestion | null {
-  if (excess <= 0) return null;
-
+function findDominantContribution(jobs: Job[], wallKey: WallDefinition["key"]) {
   const contributions = jobs
     .map((job) => {
       const activeMonths = (job.endMonth ?? 12) - job.startMonth + 1;
@@ -178,8 +144,71 @@ function suggestShiftReduction(
     .filter((c) => c.activeMonths > 0 && c.annualContribution > 0);
 
   if (contributions.length === 0) return null;
+  return contributions.reduce((a, b) => (b.annualContribution > a.annualContribution ? b : a));
+}
 
-  const target = contributions.reduce((a, b) => (b.annualContribution > a.annualContribution ? b : a));
+/** ¥表示だけだと実感が湧きにくいため、主なバイトの時給換算で「何時間分か」を併記する */
+function hoursEquivalent(
+  amount: number,
+  jobs: Job[],
+  wallKey: WallDefinition["key"],
+): ExcessImpact["hoursEquivalent"] {
+  const dominant = findDominantContribution(jobs, wallKey);
+  if (!dominant || dominant.job.hourlyWage <= 0) return null;
+  return {
+    jobName: dominant.job.name || "バイト",
+    hours: amount / dominant.job.hourlyWage,
+  };
+}
+
+/**
+ * 概算値。所得税は課税所得の最低税率区分(5%)、住民税は一律10%として超過分に掛けて試算。
+ * 実際の税額は各種控除の適用状況によって変わるため、あくまで目安として表示する。
+ * 社会保険の壁は「税」ではなく、扶養から外れて自分で保険料を払う崖なので別ロジック。
+ */
+function estimateExcessImpact(
+  wall: WallDefinition,
+  annualProjection: number,
+  jobs: Job[],
+): ExcessImpact | null {
+  const excess = annualProjection - wall.threshold;
+  if (excess <= 0) return null;
+
+  if (wall.key === "incomeTax") {
+    const amount = excess * 0.05 + excess * 0.1;
+    return {
+      label: "税負担の目安（所得税+住民税）",
+      amount,
+      note: "超過分に所得税5%+住民税10%をかけた概算です。実際の税額は各種控除の適用状況で変わります",
+      hoursEquivalent: hoursEquivalent(amount, jobs, wall.key),
+    };
+  }
+
+  // socialInsurance: 壁を超えると扶養から外れ、収入全体に対して自分で保険料を払う必要が生じる
+  const amount = 190_000;
+  return {
+    label: "扶養を外れた場合の社会保険料の目安（年間）",
+    amount,
+    note: "壁を境に段階的な負担ではなく、扶養から外れた分そのまま自己負担が発生する『崖』です。金額は年収130万円前後の一般的な目安であり、勤務先の加入状況により変わります",
+    hoursEquivalent: hoursEquivalent(amount, jobs, wall.key),
+  };
+}
+
+/**
+ * 壁を超える見込みの場合、年間寄与額が最大のバイトを対象に、
+ * 週の勤務時間をどれだけ減らせば壁以内に収まるかを逆算する。
+ * 通勤手当は勤務時間を減らしても変わらない前提のため、削減額は時給部分のみで逆算する。
+ */
+function suggestShiftReduction(
+  jobs: Job[],
+  excess: number,
+  wallKey: WallDefinition["key"],
+): ShiftSuggestion | null {
+  if (excess <= 0) return null;
+
+  const target = findDominantContribution(jobs, wallKey);
+  if (!target) return null;
+
   const weeklyHourReduction =
     excess / (target.job.hourlyWage * WEEKS_PER_MONTH * target.activeMonths);
 
@@ -207,7 +236,7 @@ export function evaluateWalls(jobs: Job[], profile: DependencyProfile): WallStat
       remainingHours,
       monthReached: monthReached(cumulative, wall.threshold),
       status: statusOf(annualProjection, wall.threshold),
-      excessImpact: estimateExcessImpact(wall, annualProjection),
+      excessImpact: estimateExcessImpact(wall, annualProjection, jobs),
       shiftSuggestion: suggestShiftReduction(jobs, excess, wall.key),
       breakdown: jobBreakdownForWall(jobs, wall.key),
     };

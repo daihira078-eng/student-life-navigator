@@ -180,6 +180,15 @@ export function WallStatusPanel({ walls }: { walls: WallStatus[] }) {
                   </span>
                 </div>
               )}
+              {w.excessImpact?.hoursEquivalent && (
+                <p className="mt-1 text-xs text-secondary">
+                  {w.excessImpact.hoursEquivalent.jobName}での勤務 約
+                  <span className="font-semibold text-primary">
+                    {formatHours(w.excessImpact.hoursEquivalent.hours)}
+                  </span>
+                  分に相当
+                </p>
+              )}
               {w.excessImpact && <p className="mt-1 text-xs text-muted">{w.excessImpact.note}</p>}
               {w.shiftSuggestion && (
                 <p className="mt-2 text-sm text-secondary">

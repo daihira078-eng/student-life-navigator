@@ -31,6 +31,8 @@ export interface ExcessImpact {
   label: string;
   amount: number;
   note: string;
+  // 金額だけだと実感が湧きにくいため、主なバイトの時給換算で「何時間分か」を併記する
+  hoursEquivalent: { jobName: string; hours: number } | null;
 }
 
 export interface ShiftSuggestion {
