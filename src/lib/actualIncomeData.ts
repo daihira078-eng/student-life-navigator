@@ -1,6 +1,7 @@
 export interface ActualIncomeRecord {
   month: number;
   amount: number;
+  note?: string; // 予定と差が出た理由などの一言メモ（任意）
 }
 
 /**

@@ -21,10 +21,11 @@ function ChartTooltip({
   label,
 }: {
   active?: boolean;
-  payload?: { value: number; name: string; color?: string }[];
+  payload?: { value: number; name: string; color?: string; payload?: { note?: string } }[];
   label?: string | number;
 }) {
   if (!active || !payload?.length) return null;
+  const note = payload[0]?.payload?.note;
   return (
     <div className="rounded border border-(--border-hairline) bg-surface px-3 py-2 text-xs shadow-sm">
       <div className="text-muted">{label}月</div>
@@ -35,6 +36,7 @@ function ChartTooltip({
           <span className="font-medium text-primary">{formatYen(p.value)}</span>
         </div>
       ))}
+      {note && <div className="mt-1.5 max-w-40 border-t border-(--gridline) pt-1.5 text-secondary">{note}</div>}
     </div>
   );
 }
@@ -50,6 +52,7 @@ export function ActualComparisonChart({ jobs, actualIncome }: ActualComparisonCh
     month: record.month,
     予測: Math.round(totalMonthlyIncomeForWall(jobs, record.month, "incomeTax")),
     実績: record.amount,
+    note: record.note,
   }));
 
   const validForError = data.filter((d) => d.実績 > 0);
@@ -72,6 +75,7 @@ export function ActualComparisonChart({ jobs, actualIncome }: ActualComparisonCh
       </div>
       <p className="mb-3 text-xs text-secondary">
         今の入力（時給・シフト）で計算した「予測」と、実際に記録していた「実績」を並べています。ズレが大きい場合、当時のシフトは今より変動が大きかった可能性があります。
+        {data.some((d) => d.note) && "バーにカーソルを合わせると、その月に書いたメモも見られます。"}
       </p>
       {data.length > 0 && (
         <div className="mb-3 grid grid-cols-2 gap-2 text-sm">

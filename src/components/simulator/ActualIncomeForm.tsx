@@ -32,34 +32,43 @@ export function ActualIncomeForm({ records, onChange }: ActualIncomeFormProps) {
       <div className="mb-3 text-sm font-semibold text-primary">実績を入力</div>
       <div className="flex flex-col gap-2">
         {records.map((record, index) => (
-          <div key={index} className="flex items-center gap-2">
-            <select
-              value={record.month}
-              onChange={(e) => update(index, { month: Number(e.target.value) })}
-              className="rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1"
-            >
-              {MONTHS.map((m) => (
-                <option key={m} value={m}>
-                  {m}月
-                </option>
-              ))}
-            </select>
+          <div key={index} className="flex flex-col gap-1 border-b border-(--gridline) pb-2 last:border-b-0 last:pb-0">
+            <div className="flex items-center gap-2">
+              <select
+                value={record.month}
+                onChange={(e) => update(index, { month: Number(e.target.value) })}
+                className="rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1"
+              >
+                {MONTHS.map((m) => (
+                  <option key={m} value={m}>
+                    {m}月
+                  </option>
+                ))}
+              </select>
+              <input
+                type="number"
+                min={0}
+                value={record.amount}
+                onChange={(e) => update(index, { amount: Number(e.target.value) })}
+                onFocus={selectOnFocus}
+                className="w-32 rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1"
+              />
+              <span className="text-xs text-muted">円（給料のみ）</span>
+              <button
+                type="button"
+                onClick={() => remove(index)}
+                className="text-xs text-muted hover:text-status-critical"
+              >
+                削除
+              </button>
+            </div>
             <input
-              type="number"
-              min={0}
-              value={record.amount}
-              onChange={(e) => update(index, { amount: Number(e.target.value) })}
-              onFocus={selectOnFocus}
-              className="w-32 rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1"
+              type="text"
+              value={record.note ?? ""}
+              onChange={(e) => update(index, { note: e.target.value })}
+              placeholder="（任意）予定と差が出た理由など一言メモ"
+              className="rounded border border-(--border-hairline) bg-transparent px-2 py-1 text-xs text-secondary outline-none placeholder:text-muted focus:border-series-1"
             />
-            <span className="text-xs text-muted">円（給料のみ）</span>
-            <button
-              type="button"
-              onClick={() => remove(index)}
-              className="text-xs text-muted hover:text-status-critical"
-            >
-              削除
-            </button>
           </div>
         ))}
       </div>
