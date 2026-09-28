@@ -4,12 +4,13 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { JobForm } from "@/components/simulator/JobForm";
 import { ProfileForm } from "@/components/simulator/ProfileForm";
-import { ResultsPanel } from "@/components/simulator/ResultsPanel";
+import { WallStatusPanel } from "@/components/simulator/WallStatusPanel";
 import { IncomeChart, type IncomeSeries } from "@/components/simulator/IncomeChart";
 import { ScenarioForm } from "@/components/simulator/ScenarioForm";
 import { ScenarioComparisonTable } from "@/components/simulator/ScenarioComparisonTable";
 import { ActualComparisonChart } from "@/components/simulator/ActualComparisonChart";
 import { ActualIncomeForm } from "@/components/simulator/ActualIncomeForm";
+import { PageTabs } from "@/components/simulator/PageTabs";
 import { cumulativeByMonth, evaluateWalls, getWalls } from "@/lib/wallCalculator";
 import { useLocalStorageState } from "@/lib/useLocalStorageState";
 import { ACTUAL_INCOME_2026, type ActualIncomeRecord } from "@/lib/actualIncomeData";
@@ -56,7 +57,15 @@ const SERIES_COLOR: Record<string, string> = {
 
 const SCENARIO_COLORS = ["var(--series-1)", "var(--series-2)", "var(--series-3)", "var(--series-4)"];
 
+const PAGE_TABS = [
+  { id: "status", label: "今の状況" },
+  { id: "trend", label: "月別推移" },
+  { id: "scenario", label: "シナリオ比較" },
+  { id: "actual", label: "実績との答え合わせ" },
+];
+
 export default function SimulatorPage() {
+  const [pageTab, setPageTab] = useState("status");
   const [jobs, setJobs] = useLocalStorageState<Job[]>("simulator:jobs", DEFAULT_JOBS);
   const [profile, setProfile] = useLocalStorageState<DependencyProfile>(
     "simulator:profile",
@@ -157,84 +166,92 @@ export default function SimulatorPage() {
           マルチジョブ扶養最適化シミュレーター
         </h1>
         <p className="mt-1 text-sm text-secondary">
-          複数バイトの時給・シフト・開始月を入力すると、123万円の壁・社会保険の壁までの残り稼働可能時間と、超えた場合の負担額の目安を横断で確認できます。通勤手当は所得税の壁では非課税(除外)、社会保険の壁では収入に含めて計算します。入力内容はブラウザのlocalStorageに保存され、次回も引き継がれます（サーバーには送信されません）。
+          複数バイトの時給・シフト・開始月を入力すると、123万円の壁・社会保険の壁までの残り稼働可能時間と、超えた場合の負担額の目安を横断で確認できます。入力内容はブラウザのlocalStorageに保存され、次回も引き継がれます（サーバーには送信されません）。
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <div className="flex flex-col gap-4">
-          <ProfileForm profile={profile} onChange={setProfile} />
-          <JobForm jobs={jobs} onChange={setJobs} />
-        </div>
+      <PageTabs tabs={PAGE_TABS} active={pageTab} onChange={setPageTab} />
 
-        <div className="flex flex-col gap-4">
-          <ResultsPanel walls={walls} series={series} targetYear={profile.targetYear} />
-        </div>
-      </div>
-
-      <div className="border-t border-(--border-hairline) pt-6">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-primary">シナリオ比較</h2>
-          <button
-            type="button"
-            onClick={addScenario}
-            className="rounded border border-dashed border-series-2 px-3 py-1.5 text-sm text-series-2 hover:opacity-80"
-          >
-            + 比較シナリオを追加（例: バイト追加/バイトを辞める）
-          </button>
-        </div>
-
-        {extraScenarios.length === 0 ? (
-          <p className="text-sm text-secondary">
-            「バイトを1つ増やしたら」「今のバイトを辞めたら」を現状と並べて比較できます。上のボタンから追加してください。
-          </p>
-        ) : (
+      {pageTab === "status" && (
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <div className="flex flex-col gap-4">
-            {extraScenarios.map((scenario) => (
-              <ScenarioForm
-                key={scenario.id}
-                scenario={scenario}
-                onChange={(next) => updateScenario(scenario.id, next)}
-                onRemove={() => removeScenario(scenario.id)}
-              />
-            ))}
-
-            {wallOptions.length > 1 && (
-              <label className="flex items-center gap-2 text-sm text-secondary">
-                比較する壁
-                <select
-                  value={activeComparisonWallKey}
-                  onChange={(e) =>
-                    setComparisonWallKey(e.target.value as "incomeTax" | "socialInsurance")
-                  }
-                  className="rounded border border-(--border-hairline) bg-transparent px-2 py-1 text-primary"
-                >
-                  {wallOptions.map((w) => (
-                    <option key={w.key} value={w.key}>
-                      {w.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
-
-            <ScenarioComparisonTable scenarios={allScenarios} profile={profile} />
-            <IncomeChart
-              series={comparisonSeries}
-              walls={comparisonWalls}
-              targetYear={profile.targetYear}
-            />
+            <ProfileForm profile={profile} onChange={setProfile} />
+            <JobForm jobs={jobs} onChange={setJobs} />
           </div>
-        )}
-      </div>
+          <div className="flex flex-col gap-4">
+            <WallStatusPanel walls={walls} />
+          </div>
+        </div>
+      )}
 
-      <div className="border-t border-(--border-hairline) pt-6">
-        <h2 className="mb-3 text-lg font-semibold text-primary">実績との答え合わせ</h2>
+      {pageTab === "trend" && (
+        <IncomeChart series={series} walls={walls} targetYear={profile.targetYear} />
+      )}
+
+      {pageTab === "scenario" && (
+        <div>
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-sm text-secondary">
+              「バイトを1つ増やしたら」「今のバイトを辞めたら」を現状と並べて比較できます。
+            </p>
+            <button
+              type="button"
+              onClick={addScenario}
+              className="shrink-0 rounded border border-dashed border-series-2 px-3 py-1.5 text-sm text-series-2 hover:opacity-80"
+            >
+              + 比較シナリオを追加
+            </button>
+          </div>
+
+          {extraScenarios.length === 0 ? (
+            <p className="text-sm text-secondary">上のボタンから追加してください。</p>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {extraScenarios.map((scenario) => (
+                <ScenarioForm
+                  key={scenario.id}
+                  scenario={scenario}
+                  onChange={(next) => updateScenario(scenario.id, next)}
+                  onRemove={() => removeScenario(scenario.id)}
+                />
+              ))}
+
+              {wallOptions.length > 1 && (
+                <label className="flex items-center gap-2 text-sm text-secondary">
+                  比較する壁
+                  <select
+                    value={activeComparisonWallKey}
+                    onChange={(e) =>
+                      setComparisonWallKey(e.target.value as "incomeTax" | "socialInsurance")
+                    }
+                    className="rounded border border-(--border-hairline) bg-transparent px-2 py-1 text-primary"
+                  >
+                    {wallOptions.map((w) => (
+                      <option key={w.key} value={w.key}>
+                        {w.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+
+              <ScenarioComparisonTable scenarios={allScenarios} profile={profile} />
+              <IncomeChart
+                series={comparisonSeries}
+                walls={comparisonWalls}
+                targetYear={profile.targetYear}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {pageTab === "actual" && (
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <ActualIncomeForm records={actualIncome} onChange={setActualIncome} />
           <ActualComparisonChart jobs={jobs} actualIncome={actualIncome} />
         </div>
-      </div>
+      )}
     </main>
   );
 }
