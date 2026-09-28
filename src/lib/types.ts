@@ -39,6 +39,12 @@ export interface ShiftSuggestion {
   weeklyHourReduction: number;
 }
 
+export interface JobContribution {
+  jobId: string;
+  jobName: string;
+  annualIncome: number;
+}
+
 export interface WallStatus {
   wall: WallDefinition;
   annualProjection: number;
@@ -48,6 +54,7 @@ export interface WallStatus {
   status: "good" | "warning" | "critical";
   excessImpact: ExcessImpact | null;
   shiftSuggestion: ShiftSuggestion | null;
+  breakdown: JobContribution[]; // このバイトの内訳。リングのセグメント表示に使う
 }
 
 export type UsageFrequency = "daily" | "weekly" | "monthly" | "rarely";

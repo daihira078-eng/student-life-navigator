@@ -16,6 +16,27 @@ const STATUS_COLOR: Record<WallStatus["status"], string> = {
   critical: "var(--status-critical)",
 };
 
+/** リングのセグメント色。バイトの登場順で固定して、複数の壁をまたいでも同じバイトは同じ色になるようにする */
+const JOB_SEGMENT_COLORS = [
+  "var(--series-2)",
+  "var(--series-4)",
+  "var(--series-5)",
+  "var(--series-3)",
+  "var(--series-8)",
+];
+
+function buildJobColorMap(walls: WallStatus[]): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const w of walls) {
+    for (const c of w.breakdown) {
+      if (!map.has(c.jobId)) {
+        map.set(c.jobId, JOB_SEGMENT_COLORS[map.size % JOB_SEGMENT_COLORS.length]);
+      }
+    }
+  }
+  return map;
+}
+
 const STATUS_LABEL: Record<WallStatus["status"], string> = {
   good: "余裕あり",
   warning: "壁に接近中",
@@ -67,6 +88,8 @@ export function WallStatusPanel({ walls }: { walls: WallStatus[] }) {
     );
   }
 
+  const jobColors = buildJobColorMap(walls);
+
   const cells = walls.flatMap((w) => [
     {
       key: `${w.wall.key}-usage`,
@@ -99,13 +122,34 @@ export function WallStatusPanel({ walls }: { walls: WallStatus[] }) {
         {walls.map((w) => (
           <AnimatedRing
             key={w.wall.key}
-            ratio={Math.min(1, w.annualProjection / w.wall.threshold)}
-            color={STATUS_COLOR[w.status]}
+            segments={w.breakdown.map((c) => ({
+              color: jobColors.get(c.jobId) ?? "var(--gridline)",
+              annualIncome: c.annualIncome,
+            }))}
+            threshold={w.wall.threshold}
+            status={w.status}
+            pctColor={STATUS_COLOR[w.status]}
             label={w.wall.label}
             sub={STATUS_LABEL[w.status]}
           />
         ))}
       </div>
+
+      {jobColors.size > 0 && (
+        <div className="mt-4 flex flex-wrap justify-center gap-x-5 gap-y-1">
+          {[...jobColors.entries()].map(([jobId, color]) => {
+            const name = walls
+              .flatMap((w) => w.breakdown)
+              .find((c) => c.jobId === jobId)?.jobName;
+            return (
+              <div key={jobId} className="flex items-center gap-1.5 text-xs text-secondary">
+                <span className="h-2 w-2 rounded-sm" style={{ background: color }} />
+                {name}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {walls.map(
         (w) =>

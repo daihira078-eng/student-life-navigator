@@ -2,6 +2,7 @@ import type {
   DependencyProfile,
   ExcessImpact,
   Job,
+  JobContribution,
   ShiftSuggestion,
   WallDefinition,
   WallStatus,
@@ -74,6 +75,27 @@ export function totalMonthlyIncomeForWall(
   return jobs
     .filter((job) => isJobActiveInMonth(job, month))
     .reduce((sum, job) => sum + monthlyIncomeForWall(job, wallKey), 0);
+}
+
+function jobAnnualIncomeForWall(job: Job, wallKey: WallDefinition["key"]): number {
+  let total = 0;
+  for (let month = 1; month <= 12; month++) {
+    if (isJobActiveInMonth(job, month)) {
+      total += monthlyIncomeForWall(job, wallKey);
+    }
+  }
+  return total;
+}
+
+/** リングのセグメント表示用に、壁ごとの年間見込み収入をバイト単位で内訳化する */
+function jobBreakdownForWall(jobs: Job[], wallKey: WallDefinition["key"]): JobContribution[] {
+  return jobs
+    .map((job) => ({
+      jobId: job.id,
+      jobName: job.name || "バイト",
+      annualIncome: jobAnnualIncomeForWall(job, wallKey),
+    }))
+    .filter((c) => c.annualIncome > 0);
 }
 
 export function weightedAverageWage(jobs: Job[]): number {
@@ -187,6 +209,7 @@ export function evaluateWalls(jobs: Job[], profile: DependencyProfile): WallStat
       status: statusOf(annualProjection, wall.threshold),
       excessImpact: estimateExcessImpact(wall, annualProjection),
       shiftSuggestion: suggestShiftReduction(jobs, excess, wall.key),
+      breakdown: jobBreakdownForWall(jobs, wall.key),
     };
   });
 }
