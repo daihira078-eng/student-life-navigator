@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { JobForm } from "@/components/simulator/JobForm";
 import { ProfileForm } from "@/components/simulator/ProfileForm";
-import { WallGauge } from "@/components/simulator/WallGauge";
+import { ResultsPanel } from "@/components/simulator/ResultsPanel";
 import { IncomeChart, type IncomeSeries } from "@/components/simulator/IncomeChart";
 import { ScenarioForm } from "@/components/simulator/ScenarioForm";
 import { ScenarioComparisonTable } from "@/components/simulator/ScenarioComparisonTable";
@@ -168,15 +168,7 @@ export default function SimulatorPage() {
         </div>
 
         <div className="flex flex-col gap-4">
-          {walls.length === 0 && (
-            <div className="rounded-lg border border-(--border-hairline) bg-surface p-4 text-sm text-secondary">
-              社会保険上の扶養に入っていない場合、社会保険の壁は表示されません。
-            </div>
-          )}
-          {walls.map((status) => (
-            <WallGauge key={status.wall.key} status={status} />
-          ))}
-          <IncomeChart series={series} walls={walls} targetYear={profile.targetYear} />
+          <ResultsPanel walls={walls} series={series} targetYear={profile.targetYear} />
         </div>
       </div>
 
