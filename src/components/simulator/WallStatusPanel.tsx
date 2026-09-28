@@ -69,7 +69,7 @@ function KpiCell({
       className="border-r border-b border-(--gridline) px-4 py-3 text-left last:border-r-0"
       style={{ borderTop: `3px solid ${accent}` }}
     >
-      <div className="text-xs text-muted">{label}</div>
+      <div className="text-xs whitespace-nowrap text-muted">{label}</div>
       <div className="text-xl font-bold text-primary tabular-nums">{value}</div>
       {expanded ? (
         <div className="mt-1 text-xs text-muted">{sub}</div>
@@ -102,7 +102,7 @@ export function WallStatusPanel({ walls }: { walls: WallStatus[] }) {
     },
     {
       key: `${w.wall.key}-hours`,
-      label: "あと働ける時間",
+      label: "働ける時間",
       value: w.remainingAmount > 0 ? formatHours(w.remainingHours) : "超過",
       sub: w.monthReached ? `${w.monthReached}月に到達見込み` : "年内到達見込みなし",
       accent: STATUS_COLOR[w.status],

@@ -31,10 +31,10 @@ const TICK_COLOR: Record<AnimatedRingProps["status"], string> = {
   critical: "var(--status-critical)",
 };
 
-const SIZE = 128;
+const SIZE = 168;
 const CENTER = SIZE / 2;
-const STROKE_WIDTH = 12;
-const RADIUS = CENTER - STROKE_WIDTH / 2 - 4; // 外側4pxは超過リング用に空けておく
+const STROKE_WIDTH = 15;
+const RADIUS = CENTER - STROKE_WIDTH / 2 - 5; // 外側5pxは超過リング用に空けておく
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 /**
@@ -113,17 +113,17 @@ export function AnimatedRing({ segments, threshold, status, pctColor, label, sub
 
         {animatedOverflowPct > 0 && (
           <div
-            className="absolute -inset-[7px] rounded-full"
+            className="absolute -inset-[9px] rounded-full"
             style={{
               background: `conic-gradient(var(--status-critical) 0% ${animatedOverflowPct}%, transparent ${animatedOverflowPct}% 100%)`,
-              WebkitMask: "radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 6px))",
-              mask: "radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 6px))",
+              WebkitMask: "radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 8px))",
+              mask: "radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 8px))",
             }}
           />
         )}
 
-        <div className="pointer-events-none absolute inset-3 flex items-center justify-center rounded-full bg-surface">
-          <span className="text-lg font-bold tabular-nums" style={{ color: pctColor }}>
+        <div className="pointer-events-none absolute inset-5 flex items-center justify-center rounded-full bg-surface">
+          <span className="text-xl font-bold tabular-nums" style={{ color: pctColor }}>
             {Math.round(animatedDisplayPct)}%
           </span>
         </div>

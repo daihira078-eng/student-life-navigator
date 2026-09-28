@@ -173,7 +173,7 @@ export default function SimulatorPage() {
       <PageTabs tabs={PAGE_TABS} active={pageTab} onChange={setPageTab} />
 
       {pageTab === "status" && (
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
           <div className="flex flex-col gap-4">
             <ProfileForm profile={profile} onChange={setProfile} />
             <JobForm jobs={jobs} onChange={setJobs} />
