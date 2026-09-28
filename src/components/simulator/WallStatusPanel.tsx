@@ -125,6 +125,7 @@ export function WallStatusPanel({ walls }: { walls: WallStatus[] }) {
           <AnimatedRing
             key={w.wall.key}
             segments={w.breakdown.map((c) => ({
+              jobName: c.jobName,
               color: jobColors.get(c.jobId) ?? "var(--gridline)",
               annualIncome: c.annualIncome,
             }))}
