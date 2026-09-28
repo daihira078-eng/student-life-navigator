@@ -2,14 +2,15 @@
 
 :root {
   color-scheme: light;
-  --surface-1: #fcfcfb;
-  --page-plane: #f9f9f7;
-  --text-primary: #0b0b0b;
-  --text-secondary: #52514e;
-  --text-muted: #898781;
-  --gridline: #e1e0d9;
-  --baseline: #c3c2b7;
-  --border-hairline: rgba(11, 11, 11, 0.1);
+  /* 純白/純グレーではなく、ブランド色(紫)にわずかに寄せた暖色系ニュートラル */
+  --surface-1: #fffdf9;
+  --page-plane: #faf6ef;
+  --text-primary: #171310;
+  --text-secondary: #5c5347;
+  --text-muted: #938a7c;
+  --gridline: #e9e0d1;
+  --baseline: #d2c7b4;
+  --border-hairline: rgba(23, 19, 16, 0.1);
 
   --series-1: #2a78d6; /* blue */
   --series-2: #008300; /* green */
@@ -20,6 +21,10 @@
   --series-7: #4a3aa7; /* violet */
   --series-8: #e34948; /* red */
 
+  /* ブランド色=紫(series-7)。指標ごとの意味色(series-1/6等)とは別の役割として使う */
+  --brand: var(--series-7);
+  --brand-soft: color-mix(in oklab, var(--series-7) 10%, transparent);
+
   --status-good: #0ca30c;
   --status-warning: #fab219;
   --status-serious: #ec835a;
@@ -29,14 +34,14 @@
 @media (prefers-color-scheme: dark) {
   :root:where(:not([data-theme="light"])) {
     color-scheme: dark;
-    --surface-1: #1a1a19;
-    --page-plane: #0d0d0d;
-    --text-primary: #ffffff;
-    --text-secondary: #c3c2b7;
-    --text-muted: #898781;
-    --gridline: #2c2c2a;
-    --baseline: #383835;
-    --border-hairline: rgba(255, 255, 255, 0.1);
+    --surface-1: #201a2b;
+    --page-plane: #14101c;
+    --text-primary: #f7f4ef;
+    --text-secondary: #cbc2e0;
+    --text-muted: #948aa8;
+    --gridline: #322a45;
+    --baseline: #443a5c;
+    --border-hairline: rgba(255, 255, 255, 0.12);
 
     --series-1: #3987e5;
     --series-2: #008300;
@@ -51,14 +56,14 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --surface-1: #1a1a19;
-  --page-plane: #0d0d0d;
-  --text-primary: #ffffff;
-  --text-secondary: #c3c2b7;
-  --text-muted: #898781;
-  --gridline: #2c2c2a;
-  --baseline: #383835;
-  --border-hairline: rgba(255, 255, 255, 0.1);
+  --surface-1: #201a2b;
+  --page-plane: #14101c;
+  --text-primary: #f7f4ef;
+  --text-secondary: #cbc2e0;
+  --text-muted: #948aa8;
+  --gridline: #322a45;
+  --baseline: #443a5c;
+  --border-hairline: rgba(255, 255, 255, 0.12);
 
   --series-1: #3987e5;
   --series-2: #008300;
@@ -78,6 +83,7 @@
   --color-muted: var(--text-muted);
   --color-gridline: var(--gridline);
   --color-baseline: var(--baseline);
+  --color-brand: var(--brand);
 
   --color-series-1: var(--series-1);
   --color-series-2: var(--series-2);
