@@ -12,6 +12,8 @@ import { ActualComparisonChart } from "@/components/simulator/ActualComparisonCh
 import { ActualIncomeForm } from "@/components/simulator/ActualIncomeForm";
 import { PageTabs } from "@/components/simulator/PageTabs";
 import { DataPortability } from "@/components/simulator/DataPortability";
+import { NotificationToggle } from "@/components/simulator/NotificationToggle";
+import { WallNotifier } from "@/components/simulator/WallNotifier";
 import { cumulativeByMonth, evaluateWalls, getWalls } from "@/lib/wallCalculator";
 import { useLocalStorageState } from "@/lib/useLocalStorageState";
 import { ACTUAL_INCOME_2026, type ActualIncomeRecord } from "@/lib/actualIncomeData";
@@ -80,6 +82,7 @@ export default function SimulatorPage() {
     "simulator:actualIncome",
     ACTUAL_INCOME_2026,
   );
+  const [notificationsEnabled] = useLocalStorageState<boolean>("simulator:notificationsEnabled", false);
 
   const walls = useMemo(() => evaluateWalls(jobs, profile), [jobs, profile]);
   const series: IncomeSeries[] = useMemo(
@@ -162,12 +165,17 @@ export default function SimulatorPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-10">
+      <WallNotifier walls={walls} enabled={notificationsEnabled} />
       <div>
         <div className="flex items-center justify-between gap-2">
           <Link href="/" className="text-sm text-muted hover:text-series-1">
             ← トップに戻る
           </Link>
           <div className="flex items-center gap-3">
+            <NotificationToggle />
+            <span aria-hidden className="text-xs text-muted">
+              /
+            </span>
             <DataPortability
               jobs={jobs}
               profile={profile}
