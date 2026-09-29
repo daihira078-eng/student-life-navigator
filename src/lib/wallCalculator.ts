@@ -8,7 +8,7 @@ import type {
   WallStatus,
 } from "./types";
 
-const WEEKS_PER_MONTH = 52 / 12;
+export const WEEKS_PER_MONTH = 52 / 12;
 
 /** 19〜23歳かどうかで特定扶養控除の対象を自動判定する */
 export function isSpecificDependentAge(age: number): boolean {

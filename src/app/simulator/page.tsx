@@ -14,6 +14,7 @@ import { PageTabs } from "@/components/simulator/PageTabs";
 import { DataPortability } from "@/components/simulator/DataPortability";
 import { NotificationToggle } from "@/components/simulator/NotificationToggle";
 import { WallNotifier } from "@/components/simulator/WallNotifier";
+import { GoalPlanner } from "@/components/simulator/GoalPlanner";
 import { cumulativeByMonth, evaluateWalls, getWalls } from "@/lib/wallCalculator";
 import { useLocalStorageState } from "@/lib/useLocalStorageState";
 import { ACTUAL_INCOME_2026, type ActualIncomeRecord } from "@/lib/actualIncomeData";
@@ -34,6 +35,7 @@ const SCENARIO_COLORS = ["var(--series-1)", "var(--series-2)", "var(--series-3)"
 
 const PAGE_TABS = [
   { id: "status", label: "今の状況" },
+  { id: "goal", label: "目標から逆算" },
   { id: "trend", label: "月別推移" },
   { id: "scenario", label: "シナリオ比較" },
   { id: "actual", label: "実績との答え合わせ" },
@@ -188,6 +190,8 @@ export default function SimulatorPage() {
           </div>
         </div>
       )}
+
+      {pageTab === "goal" && <GoalPlanner jobs={jobs} walls={walls} />}
 
       {pageTab === "trend" && (
         <IncomeChart series={series} walls={walls} targetYear={profile.targetYear} />
