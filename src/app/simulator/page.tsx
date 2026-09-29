@@ -15,7 +15,7 @@ import { DataPortability } from "@/components/simulator/DataPortability";
 import { NotificationToggle } from "@/components/simulator/NotificationToggle";
 import { WallNotifier } from "@/components/simulator/WallNotifier";
 import { GoalPlanner } from "@/components/simulator/GoalPlanner";
-import { ShiftHeatmap } from "@/components/simulator/ShiftHeatmap";
+import { ShiftCalendar } from "@/components/simulator/ShiftCalendar";
 import { cumulativeByMonth, evaluateWalls, getWalls } from "@/lib/wallCalculator";
 import { useLocalStorageState } from "@/lib/useLocalStorageState";
 import { ACTUAL_INCOME_2026, type ActualIncomeRecord } from "@/lib/actualIncomeData";
@@ -38,6 +38,7 @@ const PAGE_TABS = [
   { id: "status", label: "今の状況" },
   { id: "goal", label: "目標から逆算" },
   { id: "trend", label: "月別推移" },
+  { id: "calendar", label: "稼働カレンダー" },
   { id: "scenario", label: "シナリオ比較" },
   { id: "actual", label: "実績との答え合わせ" },
 ];
@@ -181,25 +182,24 @@ export default function SimulatorPage() {
       <PageTabs tabs={PAGE_TABS} active={pageTab} onChange={setPageTab} />
 
       {pageTab === "status" && (
-        <div className="flex flex-col gap-6">
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-            <div className="flex flex-col gap-4">
-              <ProfileForm profile={profile} onChange={setProfile} />
-              <JobForm jobs={jobs} onChange={setJobs} />
-            </div>
-            <div className="flex flex-col gap-4">
-              <WallStatusPanel walls={walls} />
-            </div>
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+          <div className="flex flex-col gap-4">
+            <ProfileForm profile={profile} onChange={setProfile} />
+            <JobForm jobs={jobs} onChange={setJobs} />
           </div>
-          <ShiftHeatmap jobs={jobs} walls={wallOptions} year={profile.targetYear} />
+          <div className="flex flex-col gap-4">
+            <WallStatusPanel walls={walls} />
+          </div>
         </div>
       )}
 
-      {pageTab === "goal" && <GoalPlanner jobs={jobs} walls={walls} />}
+      {pageTab === "goal" && <GoalPlanner jobs={jobs} walls={walls} actualIncome={actualIncome} />}
 
       {pageTab === "trend" && (
         <IncomeChart series={series} walls={walls} targetYear={profile.targetYear} />
       )}
+
+      {pageTab === "calendar" && <ShiftCalendar jobs={jobs} walls={wallOptions} year={profile.targetYear} />}
 
       {pageTab === "scenario" && (
         <div>

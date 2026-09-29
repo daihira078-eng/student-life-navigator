@@ -1,7 +1,8 @@
 "use client";
 
 import type { Job, WallStatus } from "@/lib/types";
-import { planGoal } from "@/lib/goalPlanner";
+import type { ActualIncomeRecord } from "@/lib/actualIncomeData";
+import { computeWallProgress, planGoal } from "@/lib/goalPlanner";
 import { formatHours, formatYen } from "@/lib/format";
 import { useLocalStorageState } from "@/lib/useLocalStorageState";
 import { selectOnFocus } from "@/lib/selectOnFocus";
@@ -9,18 +10,36 @@ import { selectOnFocus } from "@/lib/selectOnFocus";
 interface GoalPlannerProps {
   jobs: Job[];
   walls: WallStatus[];
+  actualIncome: ActualIncomeRecord[];
 }
 
-export function GoalPlanner({ jobs, walls }: GoalPlannerProps) {
+export function GoalPlanner({ jobs, walls, actualIncome }: GoalPlannerProps) {
   const [goalAmount, setGoalAmount] = useLocalStorageState<number>("simulator:goalAmount", 50000);
-  const plan = planGoal(jobs, walls, goalAmount);
+  const plan = planGoal(jobs, walls, goalAmount, actualIncome);
+  const progress = walls.map((w) => computeWallProgress(jobs, w.wall, actualIncome));
 
   return (
     <div className="rounded-lg border border-(--border-hairline) bg-surface p-4">
       <div className="mb-1 text-sm font-semibold text-primary">目標から逆算</div>
       <p className="mb-3 text-xs text-secondary">
-        「年内にあといくら稼ぎたいか」を入れると、壁を超えない範囲でどのバイトのシフトを増やすのが一番効率的かを逆算します（時給が一番高いバイトを優先的に割り当てます）。
+        「実績との答え合わせ」タブに入力済みの月はその実績を、未入力の月は今のシフト設定からの予測を使って、壁までの残り枠を計算します。そこから「年内にあといくら稼ぎたいか」を入れると、どのバイトのシフトを増やすのが一番効率的かを逆算します（時給が一番高いバイトを優先的に割り当てます）。
       </p>
+
+      {progress.length > 0 && (
+        <div className="mb-4 flex flex-col gap-1.5 rounded-md bg-(--page-plane) p-3 text-xs text-secondary">
+          {progress.map((p) => (
+            <div key={p.wallKey} className="flex items-center justify-between gap-2">
+              <span>{p.wallLabel.split("（")[0]}（実績＋予測）</span>
+              <span className="tabular-nums">
+                <span className="font-semibold text-primary">{formatYen(p.blendedTotal)}</span>
+                {" / "}
+                {formatYen(p.threshold)}
+                <span className="ml-1 text-muted">（残り{formatYen(p.remaining)}）</span>
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
 
       <label className="flex items-center gap-2 text-sm">
         <span className="text-secondary">追加で稼ぎたい金額</span>
