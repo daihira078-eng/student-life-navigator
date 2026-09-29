@@ -25,9 +25,15 @@ const JOB_COLORS: Record<string, string> = {
   "job-vexum": "var(--series-4)",
 };
 
+// 公開ページなので勤務先の実名は出さず、業種がわかる程度にぼかす
+const JOB_DISPLAY_NAMES: Record<string, string> = {
+  "job-cazan": "喫茶店",
+  "job-vexum": "インターン先",
+};
+
 /**
  * ホーム画面用の実データプレビュー。説明文だけで機能を語るより、
- * 開発者本人の実際の入力(CAZAN珈琲店×VEXUM)で計算した本物のリングを
+ * 開発者本人の実際の入力(喫茶店×インターン先)で計算した本物のリングを
  * そのまま見せた方が説得力があるという判断で追加した。
  */
 export function HomeWallPreview() {
@@ -37,14 +43,14 @@ export function HomeWallPreview() {
   return (
     <div className="rounded-2xl border border-(--border-hairline) bg-surface p-6 shadow-sm">
       <p className="text-center text-xs text-muted">
-        開発者本人の実データ（CAZAN珈琲店 × VEXUM、{DEFAULT_PROFILE.targetYear}年）
+        開発者本人の実データ（喫茶店 × インターン先、{DEFAULT_PROFILE.targetYear}年）
       </p>
       <div className="mt-4 flex flex-wrap justify-center gap-10">
         {walls.map((w) => (
           <AnimatedRing
             key={w.wall.key}
             segments={w.breakdown.map((c) => ({
-              jobName: c.jobName,
+              jobName: JOB_DISPLAY_NAMES[c.jobId] ?? c.jobName,
               color: JOB_COLORS[c.jobId] ?? "var(--gridline)",
               annualIncome: c.annualIncome,
             }))}
