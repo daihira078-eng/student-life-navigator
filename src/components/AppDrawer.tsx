@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 const NAV_ITEMS = [
@@ -11,6 +11,15 @@ const NAV_ITEMS = [
 export function AppDrawer() {
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    if (!open) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open]);
+
   return (
     <>
       <div className="sticky top-0 z-40 flex items-center gap-3 border-b border-(--border-hairline) bg-surface/90 px-4 py-3 backdrop-blur">
@@ -18,7 +27,8 @@ export function AppDrawer() {
           type="button"
           onClick={() => setOpen(true)}
           aria-label="メニューを開く"
-          className="flex h-8 w-8 flex-col items-center justify-center gap-1 rounded hover:bg-(--brand-soft)"
+          aria-expanded={open}
+          className="flex h-8 w-8 flex-col items-center justify-center gap-1 rounded outline-none hover:bg-(--brand-soft) focus-visible:ring-2 focus-visible:ring-brand"
         >
           <span className="h-0.5 w-4 rounded bg-primary" />
           <span className="h-0.5 w-4 rounded bg-primary" />
@@ -31,6 +41,7 @@ export function AppDrawer() {
         className={`fixed inset-0 z-50 transition-opacity duration-300 ${
           open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
+        inert={!open}
       >
         <div
           className="absolute inset-0 bg-black/30"
@@ -49,7 +60,7 @@ export function AppDrawer() {
               type="button"
               onClick={() => setOpen(false)}
               aria-label="メニューを閉じる"
-              className="rounded px-2 py-1 text-lg leading-none text-muted hover:text-primary"
+              className="rounded px-2 py-1 text-lg leading-none text-muted outline-none hover:text-primary focus-visible:ring-2 focus-visible:ring-brand"
             >
               ×
             </button>
@@ -60,7 +71,7 @@ export function AppDrawer() {
                 <Link
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className="block rounded-md px-3 py-2.5 text-sm text-primary hover:bg-(--brand-soft)"
+                  className="block rounded-md px-3 py-2.5 text-sm text-primary outline-none hover:bg-(--brand-soft) focus-visible:ring-2 focus-visible:ring-brand"
                 >
                   {item.label}
                 </Link>

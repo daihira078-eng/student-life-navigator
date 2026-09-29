@@ -66,7 +66,9 @@ function KpiCell({
     <button
       type="button"
       onClick={() => setExpanded((e) => !e)}
-      className="border-r border-b border-(--gridline) px-4 py-3 text-left last:border-r-0"
+      aria-expanded={expanded}
+      aria-label={`${label} ${value}${expanded ? "" : "。クリックで詳細を表示"}`}
+      className="border-r border-b border-(--gridline) px-4 py-3 text-left outline-none last:border-r-0 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-inset"
       style={{ borderTop: `3px solid ${accent}` }}
     >
       <div className="text-xs whitespace-nowrap text-muted">{label}</div>

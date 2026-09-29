@@ -27,9 +27,10 @@ interface JobFormProps {
   onChange: (jobs: Job[]) => void;
 }
 
-const sliderClass = "h-2 w-full cursor-pointer accent-[var(--series-1)]";
+const sliderClass =
+  "h-2 w-full cursor-pointer accent-[var(--series-1)] outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1";
 const fieldClass =
-  "rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1";
+  "rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1 focus-visible:ring-2 focus-visible:ring-brand";
 
 export function JobForm({ jobs, onChange }: JobFormProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
@@ -133,14 +134,19 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
             <button
               type="button"
               onClick={() => toggleExpanded(job.id)}
-              className="mt-3 text-xs font-medium text-series-1 hover:opacity-80"
+              aria-expanded={expanded}
+              aria-controls={`job-details-${job.id}`}
+              className="mt-3 rounded text-xs font-medium text-series-1 outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-brand"
             >
               {expanded ? "− 詳しい設定を閉じる" : "+ もっと詳しく入力する（名前・通勤手当・期間）"}
             </button>
 
             {/* 推奨: 精度を上げるための追加項目 */}
             {expanded && (
-              <div className="mt-3 grid grid-cols-2 gap-3 border-t border-(--border-hairline) pt-3 sm:grid-cols-4">
+              <div
+                id={`job-details-${job.id}`}
+                className="mt-3 grid grid-cols-2 gap-3 border-t border-(--border-hairline) pt-3 sm:grid-cols-4"
+              >
                 <label className="flex flex-col gap-1 text-xs text-secondary">
                   バイト名
                   <input

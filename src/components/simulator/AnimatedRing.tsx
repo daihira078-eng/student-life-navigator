@@ -98,10 +98,15 @@ export function AnimatedRing({ segments, threshold, status, pctColor, label, sub
               fill="none"
               stroke={arc.color}
               strokeWidth={hovered === arc.index ? STROKE_WIDTH + 3 : STROKE_WIDTH}
-              className="cursor-pointer transition-[stroke-width]"
+              className="cursor-pointer outline-none transition-[stroke-width] focus-visible:opacity-80"
               {...dashProps(arc.from, arc.to)}
+              tabIndex={0}
+              role="img"
+              aria-label={`${arc.jobName}: ${formatYen(arc.annualIncome)}`}
               onMouseEnter={() => setHovered(arc.index)}
               onMouseLeave={() => setHovered((h) => (h === arc.index ? null : h))}
+              onFocus={() => setHovered(arc.index)}
+              onBlur={() => setHovered((h) => (h === arc.index ? null : h))}
             />
           ))}
         </svg>
@@ -138,6 +143,12 @@ export function AnimatedRing({ segments, threshold, status, pctColor, label, sub
       </div>
       <div className="mt-2 text-sm text-secondary">{label}</div>
       <div className="text-xs text-muted">{sub}</div>
+      {arcs.length > 0 && (
+        <span className="sr-only">
+          内訳:{" "}
+          {arcs.map((arc) => `${arc.jobName} ${formatYen(arc.annualIncome)}`).join("、")}
+        </span>
+      )}
     </div>
   );
 }

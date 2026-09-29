@@ -4,6 +4,8 @@ import type { ActualIncomeRecord } from "@/lib/actualIncomeData";
 import { selectOnFocus } from "@/lib/selectOnFocus";
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
+const fieldClass =
+  "rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1 focus-visible:ring-2 focus-visible:ring-brand";
 
 interface ActualIncomeFormProps {
   records: ActualIncomeRecord[];
@@ -37,7 +39,8 @@ export function ActualIncomeForm({ records, onChange }: ActualIncomeFormProps) {
               <select
                 value={record.month}
                 onChange={(e) => update(index, { month: Number(e.target.value) })}
-                className="rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1"
+                aria-label="実績の月"
+                className={fieldClass}
               >
                 {MONTHS.map((m) => (
                   <option key={m} value={m}>
@@ -51,13 +54,14 @@ export function ActualIncomeForm({ records, onChange }: ActualIncomeFormProps) {
                 value={record.amount}
                 onChange={(e) => update(index, { amount: Number(e.target.value) })}
                 onFocus={selectOnFocus}
-                className="w-32 rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1"
+                aria-label={`${record.month}月の実績金額（円）`}
+                className={`w-32 ${fieldClass}`}
               />
               <span className="text-xs text-muted">円（給料のみ）</span>
               <button
                 type="button"
                 onClick={() => remove(index)}
-                className="text-xs text-muted hover:text-status-critical"
+                className="rounded text-xs text-muted outline-none hover:text-status-critical focus-visible:ring-2 focus-visible:ring-brand"
               >
                 削除
               </button>
@@ -67,7 +71,8 @@ export function ActualIncomeForm({ records, onChange }: ActualIncomeFormProps) {
               value={record.note ?? ""}
               onChange={(e) => update(index, { note: e.target.value })}
               placeholder="（任意）予定と差が出た理由など一言メモ"
-              className="rounded border border-(--border-hairline) bg-transparent px-2 py-1 text-xs text-secondary outline-none placeholder:text-muted focus:border-series-1"
+              aria-label={`${record.month}月の一言メモ`}
+              className={`text-xs placeholder:text-muted ${fieldClass}`}
             />
           </div>
         ))}
@@ -75,7 +80,7 @@ export function ActualIncomeForm({ records, onChange }: ActualIncomeFormProps) {
       <button
         type="button"
         onClick={add}
-        className="mt-3 self-start rounded border border-dashed border-(--border-hairline) px-3 py-1.5 text-sm text-secondary hover:border-series-1 hover:text-series-1"
+        className="mt-3 self-start rounded border border-dashed border-(--border-hairline) px-3 py-1.5 text-sm text-secondary outline-none hover:border-series-1 hover:text-series-1 focus-visible:ring-2 focus-visible:ring-brand"
       >
         + 実績を追加
       </button>

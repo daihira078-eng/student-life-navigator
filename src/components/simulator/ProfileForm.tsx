@@ -24,7 +24,7 @@ export function ProfileForm({ profile, onChange }: ProfileFormProps) {
           <select
             value={profile.targetYear}
             onChange={(e) => onChange({ ...profile, targetYear: Number(e.target.value) })}
-            className="rounded border border-(--border-hairline) bg-transparent px-2 py-1 text-primary"
+            className="rounded border border-(--border-hairline) bg-transparent px-2 py-1 text-primary outline-none focus-visible:ring-2 focus-visible:ring-brand"
           >
             {YEAR_OPTIONS.map((y) => (
               <option key={y} value={y}>
@@ -42,7 +42,7 @@ export function ProfileForm({ profile, onChange }: ProfileFormProps) {
             value={profile.currentAge}
             onChange={(e) => onChange({ ...profile, currentAge: Number(e.target.value) })}
             onFocus={selectOnFocus}
-            className="w-20 rounded border border-(--border-hairline) bg-transparent px-2 py-1 text-primary"
+            className="w-20 rounded border border-(--border-hairline) bg-transparent px-2 py-1 text-primary outline-none focus-visible:ring-2 focus-visible:ring-brand"
           />
         </label>
         <p className="text-xs text-muted">

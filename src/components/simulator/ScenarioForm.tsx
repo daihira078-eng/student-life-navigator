@@ -17,12 +17,13 @@ export function ScenarioForm({ scenario, onChange, onRemove }: ScenarioFormProps
           type="text"
           value={scenario.name}
           onChange={(e) => onChange({ ...scenario, name: e.target.value })}
-          className="rounded border border-(--border-hairline) bg-transparent px-2 py-1 text-sm font-semibold text-primary outline-none focus:border-series-1"
+          aria-label="シナリオ名"
+          className="rounded border border-(--border-hairline) bg-transparent px-2 py-1 text-sm font-semibold text-primary outline-none focus:border-series-1 focus-visible:ring-2 focus-visible:ring-brand"
         />
         <button
           type="button"
           onClick={onRemove}
-          className="text-xs text-muted hover:text-status-critical"
+          className="rounded text-xs text-muted outline-none hover:text-status-critical focus-visible:ring-2 focus-visible:ring-brand"
         >
           このシナリオを削除
         </button>
