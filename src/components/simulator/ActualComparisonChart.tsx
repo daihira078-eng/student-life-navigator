@@ -13,6 +13,7 @@ import {
 import type { Job } from "@/lib/types";
 import { totalMonthlyIncomeForWall } from "@/lib/wallCalculator";
 import type { ActualIncomeRecord } from "@/lib/actualIncomeData";
+import { computeAverageErrorRate } from "@/lib/predictionAccuracy";
 import { formatYen } from "@/lib/format";
 
 function ChartTooltip({
@@ -55,12 +56,7 @@ export function ActualComparisonChart({ jobs, actualIncome }: ActualComparisonCh
     note: record.note,
   }));
 
-  const validForError = data.filter((d) => d.実績 > 0);
-  const avgErrorRate =
-    validForError.length > 0
-      ? validForError.reduce((sum, d) => sum + Math.abs(d.予測 - d.実績) / d.実績, 0) /
-        validForError.length
-      : null;
+  const avgErrorRate = computeAverageErrorRate(jobs, actualIncome);
 
   const predictedTotal = data.reduce((sum, d) => sum + d.予測, 0);
   const actualTotal = data.reduce((sum, d) => sum + d.実績, 0);

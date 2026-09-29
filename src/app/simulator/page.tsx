@@ -17,36 +17,8 @@ import { WallNotifier } from "@/components/simulator/WallNotifier";
 import { cumulativeByMonth, evaluateWalls, getWalls } from "@/lib/wallCalculator";
 import { useLocalStorageState } from "@/lib/useLocalStorageState";
 import { ACTUAL_INCOME_2026, type ActualIncomeRecord } from "@/lib/actualIncomeData";
+import { DEFAULT_JOBS, DEFAULT_PROFILE } from "@/lib/defaultData";
 import type { DependencyProfile, Job, Scenario } from "@/lib/types";
-
-const DEFAULT_JOBS: Job[] = [
-  {
-    id: "job-cazan",
-    name: "CAZAN珈琲店",
-    hourlyWage: 1190,
-    daysPerWeek: 2.5,
-    hoursPerDay: 4,
-    startMonth: 4,
-    endMonth: null,
-    monthlyCommutingAllowance: 0,
-  },
-  {
-    id: "job-vexum",
-    name: "VEXUM",
-    hourlyWage: 1300,
-    daysPerWeek: 1,
-    hoursPerDay: 3.5,
-    startMonth: 8,
-    endMonth: null,
-    monthlyCommutingAllowance: 0,
-  },
-];
-
-const DEFAULT_PROFILE: DependencyProfile = {
-  currentAge: 19,
-  socialInsuranceDependent: true,
-  targetYear: new Date().getFullYear(),
-};
 
 const SERIES_LABEL: Record<string, string> = {
   incomeTax: "所得税ベースの収入（通勤手当を除く）",

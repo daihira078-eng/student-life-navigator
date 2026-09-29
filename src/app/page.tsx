@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HomeWallPreview } from "@/components/HomeWallPreview";
 
 const FEATURES = [
   {
@@ -44,6 +45,12 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="px-4 py-10">
+        <div className="mx-auto w-full max-w-2xl">
+          <HomeWallPreview />
+        </div>
+      </section>
+
       <section className="px-4 py-12">
         <div className="mx-auto grid w-full max-w-3xl gap-6 sm:grid-cols-3">
           {FEATURES.map((f) => (
@@ -53,6 +60,30 @@ export default function Home() {
               <p className="text-sm text-secondary">{f.body}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="border-t border-(--border-hairline) px-4 py-8">
+        <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-3 text-center">
+          <a
+            href="https://github.com/daihira078-eng/student-life-navigator/actions/workflows/ci.yml"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {/* GitHub側が生成する外部SVGバッジで、next/imageの最適化対象外のため素のimgでよい */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://github.com/daihira078-eng/student-life-navigator/actions/workflows/ci.yml/badge.svg"
+              alt="CI status"
+              className="h-5"
+            />
+          </a>
+          <p className="text-xs text-muted">
+            税制ロジックはユニットテストで検証済み・pushのたびにCIでbuild/lint/testを自動実行しています。
+          </p>
+          <p className="text-xs text-muted">
+            ブラウザでこのページを開いた状態で「ホーム画面に追加」すると、アプリのように使えます（オフラインでも一部利用可）。
+          </p>
         </div>
       </section>
     </main>
