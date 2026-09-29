@@ -2,10 +2,15 @@ import type { ActualIncomeRecord } from "./actualIncomeData";
 import type { Job, WallStatus } from "./types";
 import { WEEKS_PER_MONTH, totalMonthlyIncomeForWall } from "./wallCalculator";
 
+export interface JobAllocation {
+  jobId: string;
+  jobName: string;
+  hourlyWage: number;
+  weeklyHourIncrease: number; // このバイト1つだけで達成する場合に必要な週の増加時間
+}
+
 export interface GoalPlan {
-  targetJobId: string;
-  targetJobName: string;
-  weeklyHourIncrease: number;
+  allocations: JobAllocation[]; // 時給が高い順。「このバイトだけで賄うなら」という単独パターンを全バイト分並べる
   achievableAmount: number; // 壁の制約内で実際に達成できる額
   shortfall: number; // 0なら目標を完全に達成できる。正の値なら壁を超えないと届かない分
   bindingWallLabel: string | null; // 制約になっている壁。shortfallが0ならnull
@@ -43,14 +48,26 @@ export function computeWallProgress(
   };
 }
 
+function computeAllocation(job: Job, achievableAmount: number): JobAllocation {
+  const activeMonths = (job.endMonth ?? 12) - job.startMonth + 1;
+  const weeklyHourIncrease =
+    activeMonths > 0 && job.hourlyWage > 0
+      ? achievableAmount / (activeMonths * WEEKS_PER_MONTH * job.hourlyWage)
+      : 0;
+  return {
+    jobId: job.id,
+    jobName: job.name || "バイト",
+    hourlyWage: job.hourlyWage,
+    weeklyHourIncrease,
+  };
+}
+
 /**
- * 「年内にあといくら稼ぎたいか」から、壁を超えない範囲でどのバイトの週の勤務時間を
- * 増やすのが最も効率的かを逆算する。実績が入力されている月はその金額を使うため、
- * 「これまで実際に稼いだ分」を踏まえた残り枠が基準になる。
- *
- * 追加分の割り当て先には時給が最も高いバイトを選ぶ。同じ金額を稼ぐのに必要な
- * 労働時間が最も短く済み、シフトを増やす負担が一番小さいため。
- * 制約(壁の残り枠)は、対象の複数の壁のうち最も枠が小さいものを基準にする。
+ * 「年内にあといくら稼ぎたいか」から、壁を超えない範囲で達成できる額を求め、
+ * 「そのバイト1つだけで賄うとしたら週の勤務時間をどれだけ増やす必要があるか」を
+ * 全バイト分並べる。1つに絞らないのは、時給以外の事情(シフトの空き・通いやすさ等)で
+ * どのバイトを増やすか選ぶのは本人次第なため。実績が入力されている月はその金額を
+ * 使うため、「これまで実際に稼いだ分」を踏まえた残り枠が基準になる。
  */
 export function planGoal(
   jobs: Job[],
@@ -65,17 +82,12 @@ export function planGoal(
   const achievableAmount = Math.min(goalAmount, binding.remaining);
   const shortfall = goalAmount - achievableAmount;
 
-  const targetJob = jobs.reduce((a, b) => (b.hourlyWage > a.hourlyWage ? b : a));
-  const activeMonths = (targetJob.endMonth ?? 12) - targetJob.startMonth + 1;
-  const weeklyHourIncrease =
-    activeMonths > 0 && targetJob.hourlyWage > 0
-      ? achievableAmount / (activeMonths * WEEKS_PER_MONTH * targetJob.hourlyWage)
-      : 0;
+  const allocations = jobs
+    .map((job) => computeAllocation(job, achievableAmount))
+    .sort((a, b) => b.hourlyWage - a.hourlyWage);
 
   return {
-    targetJobId: targetJob.id,
-    targetJobName: targetJob.name || "バイト",
-    weeklyHourIncrease,
+    allocations,
     achievableAmount,
     shortfall,
     bindingWallLabel: shortfall > 0 ? binding.wallLabel : null,

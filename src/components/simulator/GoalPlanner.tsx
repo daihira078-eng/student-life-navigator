@@ -22,7 +22,7 @@ export function GoalPlanner({ jobs, walls, actualIncome }: GoalPlannerProps) {
     <div className="rounded-lg border border-(--border-hairline) bg-surface p-4">
       <div className="mb-1 text-sm font-semibold text-primary">目標から逆算</div>
       <p className="mb-3 text-xs text-secondary">
-        「実績との答え合わせ」タブに入力済みの月はその実績を、未入力の月は今のシフト設定からの予測を使って、壁までの残り枠を計算します。そこから「年内にあといくら稼ぎたいか」を入れると、どのバイトのシフトを増やすのが一番効率的かを逆算します（時給が一番高いバイトを優先的に割り当てます）。
+        「実績との答え合わせ」タブに入力済みの月はその実績を、未入力の月は今のシフト設定からの予測を使って、壁までの残り枠を計算します。そこから「年内にあといくら稼ぎたいか」を入れると、それぞれのバイト1つだけで賄うとしたら週の勤務時間をどれだけ増やせばいいかを全パターン並べます。
       </p>
 
       {progress.length > 0 && (
@@ -56,40 +56,38 @@ export function GoalPlanner({ jobs, walls, actualIncome }: GoalPlannerProps) {
 
       {plan && (
         <div className="mt-4 border-t border-(--gridline) pt-4 text-sm text-secondary">
-          {plan.shortfall <= 0 ? (
-            <p>
-              <span className="font-semibold text-brand">{plan.targetJobName}</span>
-              の週の勤務時間を約
-              <span className="font-semibold text-primary">{formatHours(plan.weeklyHourIncrease)}</span>
-              増やすと、年内に壁以内で目標の
+          {plan.shortfall > 0 && (
+            <p className="mb-3">
+              <span className="font-semibold text-status-critical">{plan.bindingWallLabel}</span>
+              の制約により、目標
               <span className="font-semibold text-primary">{formatYen(goalAmount)}</span>
-              を達成できます。
+              のうち
+              <span className="font-semibold text-status-critical">{formatYen(plan.shortfall)}分</span>
+              は壁を超えないと達成できません。壁以内で達成できる最大額は
+              <span className="font-semibold text-primary">{formatYen(plan.achievableAmount)}</span>
+              です。
             </p>
-          ) : (
-            <>
-              <p>
-                <span className="font-semibold text-status-critical">{plan.bindingWallLabel}</span>
-                の制約により、目標
-                <span className="font-semibold text-primary">{formatYen(goalAmount)}</span>
-                のうち
-                <span className="font-semibold text-status-critical">
-                  {formatYen(plan.shortfall)}分
-                </span>
-                は壁を超えないと達成できません。
-              </p>
-              <p className="mt-2">
-                壁以内で達成できる最大額は
-                <span className="font-semibold text-primary">{formatYen(plan.achievableAmount)}</span>
-                。
-                <span className="font-semibold text-brand">{plan.targetJobName}</span>
-                の週の勤務時間を約
-                <span className="font-semibold text-primary">
-                  {formatHours(plan.weeklyHourIncrease)}
-                </span>
-                増やすとこの額を達成できます。
-              </p>
-            </>
           )}
+
+          <p className="mb-2 text-xs text-muted">
+            {formatYen(plan.achievableAmount)}を、それぞれ1つのバイトだけで賄う場合に必要な週の増加時間（時給が高い順）
+          </p>
+          <ul className="flex flex-col gap-1.5">
+            {plan.allocations.map((a) => (
+              <li
+                key={a.jobId}
+                className="flex items-center justify-between gap-2 rounded-md bg-(--page-plane) px-3 py-2"
+              >
+                <span className="font-medium text-primary">
+                  {a.jobName}
+                  <span className="ml-1.5 text-xs text-muted">（時給{formatYen(a.hourlyWage)}）</span>
+                </span>
+                <span className="font-semibold text-brand">
+                  週約{formatHours(a.weeklyHourIncrease)}
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>

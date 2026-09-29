@@ -44,15 +44,19 @@ describe("planGoal", () => {
     const plan = planGoal(jobs, walls, 30000, []);
     expect(plan?.shortfall).toBe(0);
     expect(plan?.bindingWallLabel).toBeNull();
-    expect(plan?.weeklyHourIncrease).toBeGreaterThan(0);
+    expect(plan?.allocations[0]?.weeklyHourIncrease).toBeGreaterThan(0);
   });
 
-  it("時給が最も高いバイトを割り当て先に選ぶ", () => {
+  it("全バイト分の配分パターンを時給が高い順に並べて返す", () => {
     const jobA = job({ id: "a", name: "安いバイト", hourlyWage: 1000, daysPerWeek: 1, hoursPerDay: 1 });
     const jobB = job({ id: "b", name: "高いバイト", hourlyWage: 2000, daysPerWeek: 1, hoursPerDay: 1 });
     const walls = evaluateWalls([jobA, jobB], profile());
     const plan = planGoal([jobA, jobB], walls, 10000, []);
-    expect(plan?.targetJobId).toBe("b");
+    expect(plan?.allocations).toHaveLength(2);
+    expect(plan?.allocations[0]?.jobId).toBe("b");
+    expect(plan?.allocations[1]?.jobId).toBe("a");
+    // 時給が高いバイトの方が、同じ金額を稼ぐのに必要な時間は少ないはず
+    expect(plan!.allocations[0]!.weeklyHourIncrease).toBeLessThan(plan!.allocations[1]!.weeklyHourIncrease);
   });
 
   it("壁の残り枠を超える目標は、枠内の最大額に切り詰められる(shortfall>0)", () => {
