@@ -15,6 +15,7 @@ import { DataPortability } from "@/components/simulator/DataPortability";
 import { NotificationToggle } from "@/components/simulator/NotificationToggle";
 import { WallNotifier } from "@/components/simulator/WallNotifier";
 import { GoalPlanner } from "@/components/simulator/GoalPlanner";
+import { ShiftHeatmap } from "@/components/simulator/ShiftHeatmap";
 import { cumulativeByMonth, evaluateWalls, getWalls } from "@/lib/wallCalculator";
 import { useLocalStorageState } from "@/lib/useLocalStorageState";
 import { ACTUAL_INCOME_2026, type ActualIncomeRecord } from "@/lib/actualIncomeData";
@@ -180,14 +181,17 @@ export default function SimulatorPage() {
       <PageTabs tabs={PAGE_TABS} active={pageTab} onChange={setPageTab} />
 
       {pageTab === "status" && (
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-          <div className="flex flex-col gap-4">
-            <ProfileForm profile={profile} onChange={setProfile} />
-            <JobForm jobs={jobs} onChange={setJobs} />
+        <div className="flex flex-col gap-6">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+            <div className="flex flex-col gap-4">
+              <ProfileForm profile={profile} onChange={setProfile} />
+              <JobForm jobs={jobs} onChange={setJobs} />
+            </div>
+            <div className="flex flex-col gap-4">
+              <WallStatusPanel walls={walls} />
+            </div>
           </div>
-          <div className="flex flex-col gap-4">
-            <WallStatusPanel walls={walls} />
-          </div>
+          <ShiftHeatmap jobs={jobs} walls={wallOptions} year={profile.targetYear} />
         </div>
       )}
 

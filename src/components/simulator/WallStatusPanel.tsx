@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { WallStatus } from "@/lib/types";
 import { formatHours, formatYen } from "@/lib/format";
 import { generateAdvice } from "@/lib/adviceGenerator";
+import { JOB_SEGMENT_COLORS } from "@/lib/jobColors";
 import { AnimatedRing } from "./AnimatedRing";
 
 const WALL_ACCENT: Record<string, string> = {
@@ -18,14 +19,6 @@ const STATUS_COLOR: Record<WallStatus["status"], string> = {
 };
 
 /** リングのセグメント色。バイトの登場順で固定して、複数の壁をまたいでも同じバイトは同じ色になるようにする */
-const JOB_SEGMENT_COLORS = [
-  "var(--series-2)",
-  "var(--series-4)",
-  "var(--series-5)",
-  "var(--series-3)",
-  "var(--series-8)",
-];
-
 function buildJobColorMap(walls: WallStatus[]): Map<string, string> {
   const map = new Map<string, string>();
   for (const w of walls) {

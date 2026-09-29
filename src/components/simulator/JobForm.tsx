@@ -5,6 +5,7 @@ import type { Job } from "@/lib/types";
 import { selectOnFocus } from "@/lib/selectOnFocus";
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
+const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
 
 export function createEmptyJob(): Job {
   return {
@@ -45,6 +46,14 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
 
   function addJob() {
     onChange([...jobs, createEmptyJob()]);
+  }
+
+  function toggleWeekday(job: Job, dow: number) {
+    const current = job.weekdays ?? [];
+    const next = current.includes(dow)
+      ? current.filter((d) => d !== dow)
+      : [...current, dow].sort((a, b) => a - b);
+    updateJob(job.id, { weekdays: next, daysPerWeek: next.length });
   }
 
   function toggleExpanded(id: string) {
@@ -106,11 +115,15 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
                   max={7}
                   step={0.5}
                   value={job.daysPerWeek}
+                  disabled={(job.weekdays?.length ?? 0) > 0}
                   onChange={(e) =>
                     updateJob(job.id, { daysPerWeek: Number(e.target.value) })
                   }
-                  className={`${sliderClass} mt-2`}
+                  className={`${sliderClass} mt-2 disabled:opacity-50`}
                 />
+                {(job.weekdays?.length ?? 0) > 0 && (
+                  <span className="text-[10px] text-muted">曜日指定から自動計算</span>
+                )}
               </label>
               <label className="flex flex-col gap-1 text-xs text-secondary">
                 <span className="flex items-center justify-between">
@@ -205,6 +218,32 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
                     ))}
                   </select>
                 </label>
+
+                <div className="col-span-2 sm:col-span-4">
+                  <span className="text-xs text-secondary">
+                    稼働曜日を指定する（任意。指定すると壁到達日をカレンダーで確認できます）
+                  </span>
+                  <div className="mt-1.5 flex gap-1.5">
+                    {WEEKDAY_LABELS.map((label, dow) => {
+                      const active = (job.weekdays ?? []).includes(dow);
+                      return (
+                        <button
+                          key={dow}
+                          type="button"
+                          onClick={() => toggleWeekday(job, dow)}
+                          aria-pressed={active}
+                          className={`h-8 w-8 rounded-full text-xs font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-brand ${
+                            active
+                              ? "bg-brand text-white"
+                              : "border border-(--border-hairline) text-secondary hover:border-series-1"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             )}
           </div>

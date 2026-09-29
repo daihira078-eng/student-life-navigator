@@ -7,6 +7,9 @@ export interface Job {
   startMonth: number; // 1-12, このバイトを始めた月
   endMonth: number | null; // 1-12, このバイトを辞めた(辞める予定の)月。継続中はnull
   monthlyCommutingAllowance: number; // 通勤手当(円/月)。所得税の壁では非課税(除外)、社会保険の壁では収入に含む
+  // 0=日,1=月,...6=土。指定した場合、月ベースの平均計算(daysPerWeek)に加えて
+  // 実際のカレンダー日付でのシフト日を積み上げた日単位の壁到達日計算にも使う
+  weekdays?: number[];
 }
 
 export interface Scenario {
