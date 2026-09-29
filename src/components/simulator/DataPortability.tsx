@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import type { DependencyProfile, Job, Scenario } from "@/lib/types";
 import type { ActualIncomeRecord } from "@/lib/actualIncomeData";
-import { buildExportPayload, downloadJson, parseImportedData } from "@/lib/dataPortability";
+import { buildExportPayload, downloadJson, exportWithPicker, parseImportedData } from "@/lib/dataPortability";
 
 interface DataPortabilityProps {
   jobs: Job[];
@@ -26,10 +26,16 @@ interface DataPortabilityProps {
 export function DataPortability({ jobs, profile, extraScenarios, actualIncome, onImport }: DataPortabilityProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  function handleExport() {
+  async function handleExport() {
     const payload = buildExportPayload({ jobs, profile, extraScenarios, actualIncome });
     const dateStr = new Date().toISOString().slice(0, 10);
-    downloadJson(payload, `simulator-data-${dateStr}.json`);
+    const filename = `simulator-data-${dateStr}.json`;
+
+    // 対応ブラウザでは保存先を選べるダイアログを出す。非対応/失敗時のみ自動ダウンロードにフォールバック
+    const result = await exportWithPicker(payload, filename);
+    if (result === "fallback") {
+      downloadJson(payload, filename);
+    }
   }
 
   function handleImportClick() {
