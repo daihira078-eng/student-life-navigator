@@ -6,6 +6,7 @@ import Link from "next/link";
 const NAV_ITEMS = [
   { href: "/", label: "ホーム" },
   { href: "/simulator", label: "扶養最適化シミュレーター" },
+  { href: "/shifts", label: "シフト実績" },
 ];
 
 export function AppDrawer() {

@@ -14,6 +14,10 @@ const FEATURES = [
     title: "実績との答え合わせ",
     body: "実際の家計簿データと予測を並べて、見立てがどれくらい当たっていたかを振り返れます。",
   },
+  {
+    title: "シフト実績は別記録で管理",
+    body: "「予定通り働けたか」を日ごとに記録できます。シミュレーターの予定はあくまで仮定のまま保たれ、実績と混ざりません。",
+  },
 ];
 
 export default function Home() {
@@ -41,6 +45,12 @@ export default function Home() {
             >
               扶養最適化シミュレーターを開く
             </Link>
+            <Link
+              href="/shifts"
+              className="rounded-full border border-(--border-hairline) px-5 py-2.5 text-sm font-medium text-primary transition-colors hover:border-series-1"
+            >
+              シフト実績を記録する
+            </Link>
           </div>
         </div>
       </section>
@@ -52,7 +62,7 @@ export default function Home() {
       </section>
 
       <section className="px-4 py-12">
-        <div className="mx-auto grid w-full max-w-3xl gap-6 sm:grid-cols-3">
+        <div className="mx-auto grid w-full max-w-3xl gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {FEATURES.map((f) => (
             <div key={f.title} className="flex flex-col gap-2">
               <div className="h-1 w-8 rounded-full bg-brand" />
