@@ -10,7 +10,7 @@ export function WallIconMark({ size }: { size: number }) {
 
   const diameter = size * 0.58;
   const holeDiameter = diameter * 0.62;
-  const ringTop = size * 0.3;
+  const ringTop = (size - diameter) / 2;
   const ringLeft = (size - diameter) / 2;
   const holeTop = ringTop + (diameter - holeDiameter) / 2;
   const holeLeft = (size - holeDiameter) / 2;
