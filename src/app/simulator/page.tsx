@@ -183,11 +183,12 @@ export default function SimulatorPage() {
 
       {pageTab === "status" && (
         <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-          <div className="flex flex-col gap-4">
+          {/* モバイルでは結果(壁ステータス)を先に見せ、入力フォームのスクロールを強いない */}
+          <div className="order-2 flex flex-col gap-4 lg:order-1">
             <ProfileForm profile={profile} onChange={setProfile} />
             <JobForm jobs={jobs} onChange={setJobs} />
           </div>
-          <div className="flex flex-col gap-4">
+          <div className="order-1 flex flex-col gap-4 lg:order-2">
             <WallStatusPanel walls={walls} />
           </div>
         </div>

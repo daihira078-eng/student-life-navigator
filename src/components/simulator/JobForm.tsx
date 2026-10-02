@@ -28,8 +28,6 @@ interface JobFormProps {
   onChange: (jobs: Job[]) => void;
 }
 
-const sliderClass =
-  "h-2 w-full cursor-pointer accent-[var(--series-1)] outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1";
 const fieldClass =
   "rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm text-primary outline-none focus:border-series-1 focus-visible:ring-2 focus-visible:ring-brand";
 
@@ -74,22 +72,27 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
             key={job.id}
             className="rounded-lg border border-(--border-hairline) bg-surface p-4"
           >
-            <div className="mb-3 flex items-center justify-between">
-              <span className="text-sm font-semibold text-secondary">
-                {job.name || `バイト${index + 1}`}
-              </span>
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <input
+                type="text"
+                value={job.name}
+                onChange={(e) => updateJob(job.id, { name: e.target.value })}
+                placeholder={`バイト${index + 1}`}
+                className="min-w-0 flex-1 rounded border border-transparent bg-transparent px-1 py-0.5 text-sm font-semibold text-primary outline-none hover:border-(--border-hairline) focus:border-series-1 focus-visible:ring-2 focus-visible:ring-brand"
+              />
               {jobs.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeJob(job.id)}
-                  className="text-sm text-muted hover:text-status-critical"
+                  className="shrink-0 text-sm text-muted hover:text-status-critical"
                 >
                   削除
                 </button>
               )}
             </div>
 
-            {/* 必須: これだけで計算が成立する最小セット */}
+            {/* 必須: これだけで計算が成立する最小セット。日数・時間は「もう分かっている事実」を
+                正確に入れる場面なので、連続値を探るスライダーではなく数値入力にしている */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <label className="flex flex-col gap-1 text-xs text-secondary">
                 時給（円）
@@ -105,12 +108,9 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
                 />
               </label>
               <label className="flex flex-col gap-1 text-xs text-secondary">
-                <span className="flex items-center justify-between">
-                  週の勤務日数
-                  <span className="font-medium text-primary">{job.daysPerWeek}日</span>
-                </span>
+                週の勤務日数
                 <input
-                  type="range"
+                  type="number"
                   min={0}
                   max={7}
                   step={0.5}
@@ -119,19 +119,17 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
                   onChange={(e) =>
                     updateJob(job.id, { daysPerWeek: Number(e.target.value) })
                   }
-                  className={`${sliderClass} mt-2 disabled:opacity-50`}
+                  onFocus={selectOnFocus}
+                  className={`${fieldClass} disabled:opacity-50`}
                 />
                 {(job.weekdays?.length ?? 0) > 0 && (
                   <span className="text-[10px] text-muted">曜日指定から自動計算</span>
                 )}
               </label>
               <label className="flex flex-col gap-1 text-xs text-secondary">
-                <span className="flex items-center justify-between">
-                  1日の勤務時間
-                  <span className="font-medium text-primary">{job.hoursPerDay}時間</span>
-                </span>
+                1日の勤務時間
                 <input
-                  type="range"
+                  type="number"
                   min={0}
                   max={12}
                   step={0.5}
@@ -139,7 +137,8 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
                   onChange={(e) =>
                     updateJob(job.id, { hoursPerDay: Number(e.target.value) })
                   }
-                  className={`${sliderClass} mt-2`}
+                  onFocus={selectOnFocus}
+                  className={fieldClass}
                 />
               </label>
             </div>
@@ -151,7 +150,7 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
               aria-controls={`job-details-${job.id}`}
               className="mt-3 rounded text-xs font-medium text-series-1 outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-brand"
             >
-              {expanded ? "− 詳しい設定を閉じる" : "+ もっと詳しく入力する（名前・通勤手当・期間）"}
+              {expanded ? "− 詳しい設定を閉じる" : "+ もっと詳しく入力する（通勤手当・期間）"}
             </button>
 
             {/* 推奨: 精度を上げるための追加項目 */}
@@ -160,16 +159,6 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
                 id={`job-details-${job.id}`}
                 className="mt-3 grid grid-cols-2 gap-3 border-t border-(--border-hairline) pt-3 sm:grid-cols-4"
               >
-                <label className="flex flex-col gap-1 text-xs text-secondary">
-                  バイト名
-                  <input
-                    type="text"
-                    value={job.name}
-                    onChange={(e) => updateJob(job.id, { name: e.target.value })}
-                    placeholder="例: CAZAN珈琲店"
-                    className={fieldClass}
-                  />
-                </label>
                 <label className="flex flex-col gap-1 text-xs text-secondary">
                   通勤手当（円/月）
                   <input
