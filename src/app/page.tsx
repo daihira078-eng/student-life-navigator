@@ -5,8 +5,16 @@ import { WallIconMark } from "@/lib/pwaIcon";
 export default function Home() {
   return (
     <main className="flex flex-1 flex-col">
-      <section className="px-4 py-20">
-        <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
+      <section className="relative overflow-hidden px-4 py-20">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-16 left-[max(0px,calc(50%-26rem))] h-72 w-72 rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle, color-mix(in oklab, var(--brand) 32%, transparent) 0%, transparent 70%)",
+          }}
+        />
+        <div className="relative mx-auto flex w-full max-w-3xl flex-col gap-5">
           <div
             className="h-16 w-16 overflow-hidden rounded-xl"
             style={{ boxShadow: "0 1px 0 var(--border-hairline)" }}

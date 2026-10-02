@@ -16,6 +16,7 @@ import { NotificationToggle } from "@/components/simulator/NotificationToggle";
 import { WallNotifier } from "@/components/simulator/WallNotifier";
 import { GoalPlanner } from "@/components/simulator/GoalPlanner";
 import { ShiftCalendar } from "@/components/simulator/ShiftCalendar";
+import { ScheduleDriftNotice } from "@/components/simulator/ScheduleDriftNotice";
 import { cumulativeByMonth, evaluateWalls, getWalls } from "@/lib/wallCalculator";
 import { useLocalStorageState } from "@/lib/useLocalStorageState";
 import { ACTUAL_INCOME_2026, type ActualIncomeRecord } from "@/lib/actualIncomeData";
@@ -186,6 +187,7 @@ export default function SimulatorPage() {
           {/* モバイルでは結果(壁ステータス)を先に見せ、入力フォームのスクロールを強いない */}
           <div className="order-2 flex flex-col gap-4 lg:order-1">
             <ProfileForm profile={profile} onChange={setProfile} />
+            <ScheduleDriftNotice jobs={jobs} onChange={setJobs} />
             <JobForm jobs={jobs} onChange={setJobs} />
           </div>
           <div className="order-1 flex flex-col gap-4 lg:order-2">
