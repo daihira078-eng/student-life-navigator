@@ -33,6 +33,7 @@ const fieldClass =
 
 export function JobForm({ jobs, onChange }: JobFormProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
 
   function updateJob(id: string, patch: Partial<Job>) {
     onChange(jobs.map((job) => (job.id === id ? { ...job, ...patch } : job)));
@@ -40,6 +41,7 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
 
   function removeJob(id: string) {
     onChange(jobs.filter((job) => job.id !== id));
+    setConfirmingDeleteId(null);
   }
 
   function addJob() {
@@ -64,14 +66,16 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col">
+      <div className="mb-1 flex items-baseline justify-between border-b-2 border-(--text-primary) pb-2.5">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-primary">登録中のバイト</h2>
+        <span className="text-[11px] text-muted">{jobs.length}件</span>
+      </div>
       {jobs.map((job, index) => {
         const expanded = expandedIds.has(job.id);
+        const confirmingDelete = confirmingDeleteId === job.id;
         return (
-          <div
-            key={job.id}
-            className="rounded-lg border border-(--border-hairline) bg-surface p-4"
-          >
+          <div key={job.id} className="border-b border-(--gridline) py-4">
             <div className="mb-3 flex items-center justify-between gap-2">
               <input
                 type="text"
@@ -80,15 +84,34 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
                 placeholder={`バイト${index + 1}`}
                 className="min-w-0 flex-1 rounded border border-transparent bg-transparent px-1 py-0.5 text-sm font-semibold text-primary outline-none hover:border-(--border-hairline) focus:border-series-1 focus-visible:ring-2 focus-visible:ring-brand"
               />
-              {jobs.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeJob(job.id)}
-                  className="shrink-0 text-sm text-muted hover:text-status-critical"
-                >
-                  削除
-                </button>
-              )}
+              {jobs.length > 1 &&
+                (confirmingDelete ? (
+                  <span className="flex shrink-0 items-center gap-2 text-xs">
+                    <span className="text-secondary">削除する？</span>
+                    <button
+                      type="button"
+                      onClick={() => removeJob(job.id)}
+                      className="font-semibold text-status-critical hover:opacity-80"
+                    >
+                      削除する
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmingDeleteId(null)}
+                      className="text-muted hover:text-primary"
+                    >
+                      キャンセル
+                    </button>
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setConfirmingDeleteId(job.id)}
+                    className="shrink-0 text-sm text-muted hover:text-status-critical"
+                  >
+                    削除
+                  </button>
+                ))}
             </div>
 
             {/* 必須: これだけで計算が成立する最小セット。日数・時間は「もう分かっている事実」を
@@ -212,7 +235,7 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
                   <span className="text-xs text-secondary">
                     稼働曜日を指定する（任意。指定すると壁到達日をカレンダーで確認できます）
                   </span>
-                  <div className="mt-1.5 flex gap-1.5">
+                  <div className="mt-1.5 flex gap-2">
                     {WEEKDAY_LABELS.map((label, dow) => {
                       const active = (job.weekdays ?? []).includes(dow);
                       return (
@@ -221,7 +244,7 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
                           type="button"
                           onClick={() => toggleWeekday(job, dow)}
                           aria-pressed={active}
-                          className={`h-8 w-8 rounded-full text-xs font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-brand ${
+                          className={`h-12 w-12 rounded-full text-xs font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-brand ${
                             active
                               ? "bg-brand text-white"
                               : "border border-(--border-hairline) text-secondary hover:border-series-1"
@@ -241,7 +264,7 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
       <button
         type="button"
         onClick={addJob}
-        className="self-start rounded border border-dashed border-(--border-hairline) px-3 py-1.5 text-sm text-secondary hover:border-series-1 hover:text-series-1"
+        className="mt-4 self-start rounded border border-dashed border-(--border-hairline) px-3 py-1.5 text-sm text-secondary hover:border-series-1 hover:text-series-1"
       >
         + バイトを追加
       </button>

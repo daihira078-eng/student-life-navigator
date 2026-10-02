@@ -45,7 +45,7 @@ export function GoalPlanner({ jobs, walls, actualIncome }: GoalPlannerProps) {
       </p>
 
       {progress.length > 0 && (
-        <div className="mb-4 flex flex-col gap-1.5 rounded-md bg-(--page-plane) p-3 text-xs text-secondary">
+        <div className="mb-4 flex flex-col gap-1.5 bg-(--page-plane) p-3 text-xs text-secondary">
           {progress.map((p) => (
             <div key={p.wallKey} className="flex items-center justify-between gap-2">
               <span>{p.wallLabel.split("（")[0]}（実績＋予測）</span>
@@ -60,7 +60,11 @@ export function GoalPlanner({ jobs, walls, actualIncome }: GoalPlannerProps) {
         </div>
       )}
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col">
+        <div className="mb-1 flex items-baseline justify-between border-b-2 border-(--text-primary) pb-2.5">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-primary">目標一覧</h2>
+          <span className="text-[11px] text-muted">{goals.length}件</span>
+        </div>
         {goals.map((goal) => (
           <GoalCard
             key={goal.id}
@@ -97,10 +101,11 @@ interface GoalCardProps {
 }
 
 function GoalCard({ goal, jobs, walls, actualIncome, onChange, onRemove }: GoalCardProps) {
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const plan = planGoal(jobs, walls, goal.amount, actualIncome, goal.targetMonth);
 
   return (
-    <div className="rounded-md border border-(--gridline) p-3">
+    <div className="border-b border-(--gridline) py-4">
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <input
           type="text"
@@ -110,16 +115,35 @@ function GoalCard({ goal, jobs, walls, actualIncome, onChange, onRemove }: GoalC
           placeholder="目標の名前"
           className="min-w-0 flex-1 rounded border border-(--border-hairline) bg-transparent px-2 py-1.5 text-sm font-medium text-primary outline-none focus:border-series-1 focus-visible:ring-2 focus-visible:ring-brand"
         />
-        {onRemove && (
-          <button
-            type="button"
-            onClick={onRemove}
-            aria-label="この目標を削除"
-            className="rounded px-2 py-1 text-xs text-muted outline-none hover:text-status-critical focus-visible:ring-2 focus-visible:ring-brand"
-          >
-            削除
-          </button>
-        )}
+        {onRemove &&
+          (confirmingDelete ? (
+            <span className="flex shrink-0 items-center gap-2 text-xs">
+              <span className="text-secondary">削除する？</span>
+              <button
+                type="button"
+                onClick={onRemove}
+                className="font-semibold text-status-critical hover:opacity-80"
+              >
+                削除する
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmingDelete(false)}
+                className="text-muted hover:text-primary"
+              >
+                キャンセル
+              </button>
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirmingDelete(true)}
+              aria-label="この目標を削除"
+              className="rounded px-2 py-1 text-xs text-muted outline-none hover:text-status-critical focus-visible:ring-2 focus-visible:ring-brand"
+            >
+              削除
+            </button>
+          ))}
       </div>
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
@@ -175,7 +199,7 @@ function GoalCard({ goal, jobs, walls, actualIncome, onChange, onRemove }: GoalC
             {plan.allocations.map((a) => (
               <li
                 key={a.jobId}
-                className="flex items-center justify-between gap-2 rounded-md bg-(--page-plane) px-3 py-2"
+                className="flex items-center justify-between gap-2 bg-(--page-plane) px-3 py-2"
               >
                 <span className="font-medium text-primary">
                   {a.jobName}
@@ -199,7 +223,7 @@ function GoalCard({ goal, jobs, walls, actualIncome, onChange, onRemove }: GoalC
                 {plan.evenSplit.map((a) => (
                   <li
                     key={a.jobId}
-                    className="flex items-center justify-between gap-2 rounded-md bg-(--page-plane) px-3 py-2"
+                    className="flex items-center justify-between gap-2 bg-(--page-plane) px-3 py-2"
                   >
                     <span className="font-medium text-primary">
                       {a.jobName}
