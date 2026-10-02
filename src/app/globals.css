@@ -2,15 +2,15 @@
 
 :root {
   color-scheme: light;
-  /* 純白/純グレーではなく、ブランド色(紫)にわずかに寄せた暖色系ニュートラル */
-  --surface-1: #fffdf9;
-  --page-plane: #faf6ef;
-  --text-primary: #171310;
-  --text-secondary: #5c5347;
-  --text-muted: #938a7c;
-  --gridline: #e9e0d1;
-  --baseline: #d2c7b4;
-  --border-hairline: rgba(23, 19, 16, 0.1);
+  /* 給与明細/ダッシュボード方向性。純白ではなく冷たいオフホワイトの地に、紺の文字 */
+  --surface-1: #ffffff;
+  --page-plane: #eef0f5;
+  --text-primary: #0b0e16;
+  --text-secondary: #4b5270;
+  --text-muted: #8890a8;
+  --gridline: #d6dae4;
+  --baseline: #c3c9d8;
+  --border-hairline: rgba(11, 14, 22, 0.12);
 
   --series-1: #2a78d6; /* blue */
   --series-2: #008300; /* green */
@@ -21,9 +21,13 @@
   --series-7: #4a3aa7; /* violet */
   --series-8: #e34948; /* red */
 
-  /* ブランド色=紫(series-7)。指標ごとの意味色(series-1/6等)とは別の役割として使う */
-  --brand: var(--series-7);
-  --brand-soft: color-mix(in oklab, var(--series-7) 10%, transparent);
+  /* ブランド色=シアン。良好=緑のステータス色と衝突しない色相を選んでいる */
+  --brand: #0e8e96;
+  --brand-soft: color-mix(in oklab, var(--brand) 10%, transparent);
+
+  /* 「本人の声」が出る場所(ひとことアドバイス等)だけに使う体温担当の色 */
+  --warm: #b35900;
+  --warm-soft: color-mix(in oklab, var(--warm) 8%, transparent);
 
   --status-good: #0ca30c;
   --status-warning: #fab219;
@@ -34,14 +38,14 @@
 @media (prefers-color-scheme: dark) {
   :root:where(:not([data-theme="light"])) {
     color-scheme: dark;
-    --surface-1: #201a2b;
-    --page-plane: #14101c;
-    --text-primary: #f7f4ef;
-    --text-secondary: #cbc2e0;
-    --text-muted: #948aa8;
-    --gridline: #322a45;
-    --baseline: #443a5c;
-    --border-hairline: rgba(255, 255, 255, 0.12);
+    --surface-1: #151a28;
+    --page-plane: #0b0e16;
+    --text-primary: #eef1f7;
+    --text-secondary: #9aa2bc;
+    --text-muted: #616a88;
+    --gridline: #262d42;
+    --baseline: #343c58;
+    --border-hairline: rgba(238, 241, 247, 0.1);
 
     --series-1: #3987e5;
     --series-2: #008300;
@@ -51,19 +55,25 @@
     --series-6: #d95926;
     --series-7: #9085e9;
     --series-8: #e66767;
+
+    --brand: #3fd6e0;
+    --brand-soft: color-mix(in oklab, var(--brand) 12%, transparent);
+
+    --warm: #e0a23f;
+    --warm-soft: color-mix(in oklab, var(--warm) 10%, transparent);
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --surface-1: #201a2b;
-  --page-plane: #14101c;
-  --text-primary: #f7f4ef;
-  --text-secondary: #cbc2e0;
-  --text-muted: #948aa8;
-  --gridline: #322a45;
-  --baseline: #443a5c;
-  --border-hairline: rgba(255, 255, 255, 0.12);
+  --surface-1: #151a28;
+  --page-plane: #0b0e16;
+  --text-primary: #eef1f7;
+  --text-secondary: #9aa2bc;
+  --text-muted: #616a88;
+  --gridline: #262d42;
+  --baseline: #343c58;
+  --border-hairline: rgba(238, 241, 247, 0.1);
 
   --series-1: #3987e5;
   --series-2: #008300;
@@ -73,6 +83,39 @@
   --series-6: #d95926;
   --series-7: #9085e9;
   --series-8: #e66767;
+
+  --brand: #3fd6e0;
+  --brand-soft: color-mix(in oklab, var(--brand) 12%, transparent);
+
+  --warm: #e0a23f;
+  --warm-soft: color-mix(in oklab, var(--warm) 10%, transparent);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --surface-1: #ffffff;
+  --page-plane: #eef0f5;
+  --text-primary: #0b0e16;
+  --text-secondary: #4b5270;
+  --text-muted: #8890a8;
+  --gridline: #d6dae4;
+  --baseline: #c3c9d8;
+  --border-hairline: rgba(11, 14, 22, 0.12);
+
+  --series-1: #2a78d6;
+  --series-2: #008300;
+  --series-3: #e87ba4;
+  --series-4: #eda100;
+  --series-5: #1baf7a;
+  --series-6: #eb6834;
+  --series-7: #4a3aa7;
+  --series-8: #e34948;
+
+  --brand: #0e8e96;
+  --brand-soft: color-mix(in oklab, var(--brand) 10%, transparent);
+
+  --warm: #b35900;
+  --warm-soft: color-mix(in oklab, var(--warm) 8%, transparent);
 }
 
 @theme inline {
@@ -84,6 +127,7 @@
   --color-gridline: var(--gridline);
   --color-baseline: var(--baseline);
   --color-brand: var(--brand);
+  --color-warm: var(--warm);
 
   --color-series-1: var(--series-1);
   --color-series-2: var(--series-2);
@@ -99,11 +143,12 @@
   --color-status-serious: var(--status-serious);
   --color-status-critical: var(--status-critical);
 
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-mplus1);
+  --font-mono: var(--font-mplus1-code);
 }
 
 body {
   background: var(--page-plane);
   color: var(--text-primary);
+  letter-spacing: 0.01em;
 }

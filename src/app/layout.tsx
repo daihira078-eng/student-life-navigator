@@ -1,17 +1,19 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { M_PLUS_1, M_PLUS_1_Code } from "next/font/google";
 import { AppDrawer } from "@/components/AppDrawer";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const mplus1 = M_PLUS_1({
+  variable: "--font-mplus1",
   subsets: ["latin"],
+  preload: false,
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const mplus1Code = M_PLUS_1_Code({
+  variable: "--font-mplus1-code",
   subsets: ["latin"],
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -25,14 +27,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#4a3aa7",
+  themeColor: "#0b0e16",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="ja"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${mplus1.variable} ${mplus1Code.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col font-sans">
         <ServiceWorkerRegister />

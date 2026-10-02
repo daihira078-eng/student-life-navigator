@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { href: "/", label: "ホーム" },
   { href: "/simulator", label: "扶養最適化シミュレーター" },
   { href: "/shifts", label: "シフト実績" },
+  { href: "/about", label: "このツールについて" },
 ];
 
 export function AppDrawer() {
