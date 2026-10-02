@@ -34,6 +34,7 @@ const fieldClass =
 export function JobForm({ jobs, onChange }: JobFormProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
+  const [exitingId, setExitingId] = useState<string | null>(null);
 
   function updateJob(id: string, patch: Partial<Job>) {
     onChange(jobs.map((job) => (job.id === id ? { ...job, ...patch } : job)));
@@ -42,6 +43,13 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
   function removeJob(id: string) {
     onChange(jobs.filter((job) => job.id !== id));
     setConfirmingDeleteId(null);
+    setExitingId(null);
+  }
+
+  function startRemoveJob(id: string) {
+    setConfirmingDeleteId(null);
+    setExitingId(id);
+    setTimeout(() => removeJob(id), 200);
   }
 
   function addJob() {
@@ -74,8 +82,14 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
       {jobs.map((job, index) => {
         const expanded = expandedIds.has(job.id);
         const confirmingDelete = confirmingDeleteId === job.id;
+        const exiting = exitingId === job.id;
         return (
-          <div key={job.id} className="border-b border-(--gridline) py-4">
+          <div
+            key={job.id}
+            className={`row-enter border-b border-(--gridline) px-2 py-4 -mx-2 transition-[opacity,transform] duration-200 hover:bg-(--page-plane) ${
+              exiting ? "pointer-events-none -translate-x-1 opacity-0" : ""
+            }`}
+          >
             <div className="mb-3 flex items-center justify-between gap-2">
               <input
                 type="text"
@@ -90,7 +104,7 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
                     <span className="text-secondary">削除する？</span>
                     <button
                       type="button"
-                      onClick={() => removeJob(job.id)}
+                      onClick={() => startRemoveJob(job.id)}
                       className="font-semibold text-status-critical hover:opacity-80"
                     >
                       削除する

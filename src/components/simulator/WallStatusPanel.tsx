@@ -5,6 +5,7 @@ import type { WallStatus } from "@/lib/types";
 import { formatHours, formatYen } from "@/lib/format";
 import { generateAdvice } from "@/lib/adviceGenerator";
 import { JOB_SEGMENT_COLORS } from "@/lib/jobColors";
+import { useAnimatedNumber } from "@/lib/useAnimatedNumber";
 import { AnimatedRing } from "./AnimatedRing";
 
 const WALL_ACCENT: Record<string, string> = {
@@ -45,27 +46,35 @@ function shortWallLabel(wall: WallStatus["wall"]): string {
 
 function KpiCell({
   label,
-  value,
+  numericValue,
+  formatValue,
+  staticValue,
   sub,
   accent,
 }: {
   label: string;
-  value: string;
+  numericValue: number | null;
+  formatValue?: (n: number) => string;
+  staticValue?: string;
   sub: string;
   accent: string;
 }) {
   const [expanded, setExpanded] = useState(false);
+  // 値が変わった瞬間にパッと切り替わるのではなく、再計算されたことが伝わるようカウントアップ/ダウンさせる
+  const animated = useAnimatedNumber(numericValue ?? 0);
+  const displayValue = numericValue === null ? (staticValue ?? "") : (formatValue?.(animated) ?? String(Math.round(animated)));
+
   return (
     <button
       type="button"
       onClick={() => setExpanded((e) => !e)}
       aria-expanded={expanded}
-      aria-label={`${label} ${value}${expanded ? "" : "。クリックで詳細を表示"}`}
+      aria-label={`${label} ${staticValue ?? formatValue?.(numericValue ?? 0) ?? ""}${expanded ? "" : "。クリックで詳細を表示"}`}
       className="border-r border-b border-(--gridline) px-4 py-3 text-left outline-none last:border-r-0 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-inset"
       style={{ borderTop: `3px solid ${accent}` }}
     >
       <div className="text-xs whitespace-nowrap text-muted">{label}</div>
-      <div className="text-xl font-bold text-primary tabular-nums">{value}</div>
+      <div className="text-xl font-bold text-primary tabular-nums">{displayValue}</div>
       {expanded ? (
         <div className="mt-1 text-xs text-muted">{sub}</div>
       ) : (
@@ -91,14 +100,18 @@ export function WallStatusPanel({ walls }: { walls: WallStatus[] }) {
     {
       key: `${w.wall.key}-usage`,
       label: `${shortWallLabel(w.wall)} 使用率`,
-      value: `${Math.round(Math.min(1, w.annualProjection / w.wall.threshold) * 100)}%`,
+      numericValue: Math.round(Math.min(1, w.annualProjection / w.wall.threshold) * 100),
+      formatValue: (n: number) => `${Math.round(n)}%`,
+      staticValue: undefined,
       sub: `${formatYen(w.annualProjection)} / ${formatYen(w.wall.threshold)}`,
       accent: WALL_ACCENT[w.wall.key] ?? "var(--gridline)",
     },
     {
       key: `${w.wall.key}-hours`,
       label: "働ける時間",
-      value: w.remainingAmount > 0 ? formatHours(w.remainingHours) : "超過",
+      numericValue: w.remainingAmount > 0 ? w.remainingHours : null,
+      formatValue: formatHours,
+      staticValue: w.remainingAmount > 0 ? undefined : "超過",
       sub: w.monthReached ? `${w.monthReached}月に到達見込み` : "年内到達見込みなし",
       accent: STATUS_COLOR[w.status],
     },
@@ -111,7 +124,15 @@ export function WallStatusPanel({ walls }: { walls: WallStatus[] }) {
         style={{ gridTemplateColumns: `repeat(${cells.length}, minmax(0, 1fr))` }}
       >
         {cells.map((c) => (
-          <KpiCell key={c.key} label={c.label} value={c.value} sub={c.sub} accent={c.accent} />
+          <KpiCell
+            key={c.key}
+            label={c.label}
+            numericValue={c.numericValue}
+            formatValue={c.formatValue}
+            staticValue={c.staticValue}
+            sub={c.sub}
+            accent={c.accent}
+          />
         ))}
       </div>
 

@@ -102,10 +102,21 @@ interface GoalCardProps {
 
 function GoalCard({ goal, jobs, walls, actualIncome, onChange, onRemove }: GoalCardProps) {
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [exiting, setExiting] = useState(false);
   const plan = planGoal(jobs, walls, goal.amount, actualIncome, goal.targetMonth);
 
+  function startRemove() {
+    setConfirmingDelete(false);
+    setExiting(true);
+    setTimeout(() => onRemove?.(), 200);
+  }
+
   return (
-    <div className="border-b border-(--gridline) py-4">
+    <div
+      className={`row-enter border-b border-(--gridline) px-2 py-4 -mx-2 transition-[opacity,transform] duration-200 hover:bg-(--page-plane) ${
+        exiting ? "pointer-events-none -translate-x-1 opacity-0" : ""
+      }`}
+    >
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <input
           type="text"
@@ -121,7 +132,7 @@ function GoalCard({ goal, jobs, walls, actualIncome, onChange, onRemove }: GoalC
               <span className="text-secondary">削除する？</span>
               <button
                 type="button"
-                onClick={onRemove}
+                onClick={startRemove}
                 className="font-semibold text-status-critical hover:opacity-80"
               >
                 削除する

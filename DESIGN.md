@@ -48,6 +48,14 @@
 - **破壊的な操作(削除)には確認を挟む**: ワンクリックで即削除せず、「削除」→「削除する？[削除する][キャンセル]」の2段階にする。ネイティブの`confirm()`は使わない(デザインが統一できない・自動テストでフリーズするリスクがあるため)。実装例: `JobForm.tsx`, `GoalPlanner.tsx` の `GoalCard`。
 - **タップ領域は最低48px四方**(Material Designの推奨に準拠)。アイコンや短いラベルのトグルボタンでも `h-12 w-12` 以上を確保する。実装例: `JobForm.tsx` の曜日トグル。
 
+## モーション
+
+「情報を伝える場面でだけアニメーションを使う」方針。装飾目的のモーション(3Dオブジェクト・背景パーティクル等)は使わない。3Dは機能には使わず、将来的に背景のアクセント程度に留める想定。
+
+- **数値の再計算はカウントアップ/ダウンで見せる**: `useAnimatedNumber`(`src/lib/useAnimatedNumber.ts`)を使い、入力を変えた瞬間に数字がパッと切り替わるのではなく「今、再計算された」ことが伝わるようにする。実装例: `AnimatedRing.tsx`、`WallStatusPanel.tsx` の `KpiCell`。
+- **ledger行の追加/削除はトランジションを入れる**: 追加時は`.row-enter`(`globals.css`で定義、280ms fade+slide)が新規マウント時にだけ自動で再生される(既存行はReactのkey再利用でDOMノードが維持されるため再生されない)。削除時は即座に配列から消さず、`opacity-0`+`-translate-x-1`のクラスを200ms当ててから実際の削除を行う(`startRemoveJob`/`startRemove`のパターン)。実装例: `JobForm.tsx`, `GoalPlanner.tsx` の `GoalCard`。
+- **`prefers-reduced-motion: reduce`は`globals.css`でグローバルに無効化**している。個別コンポーネントでの対応は不要。
+
 ## ロゴ・アイコン
 
 `src/lib/pwaIcon.tsx` の `WallIconMark`。壁ステータスのリング表示(ドーナツ)をそのまま縮約したモチーフ。帯(2本線)が壁の閾値、リングの上に少しはみ出た部分だけ白く発光させて「壁を超えている分」を表す。PWAアイコン(`/pwa-icon/192`, `/pwa-icon/512`)とホームのロゴ(`src/app/page.tsx`)で共有。サイズを変えても崩れないよう、すべて `size` 引数からの相対値で計算している。
