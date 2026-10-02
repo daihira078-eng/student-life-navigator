@@ -183,7 +183,9 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
                 className="mt-3 grid grid-cols-2 gap-3 border-t border-(--border-hairline) pt-3 sm:grid-cols-4"
               >
                 <label className="flex flex-col gap-1 text-xs text-secondary">
-                  通勤手当（円/月）
+                  <span className="whitespace-nowrap">
+                    通勤手当 <span className="text-muted">(円/月)</span>
+                  </span>
                   <input
                     type="number"
                     min={0}
