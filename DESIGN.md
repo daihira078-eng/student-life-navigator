@@ -66,6 +66,14 @@
 - **バイトの色**: `Job.color`で選択式。未指定時は登場順の自動割り当て(`buildJobColorMapFromJobs`、`src/lib/jobColors.ts`)にフォールバックする。色を選ぶ場所が増えるたびに、この自動割り当て関数を経由させて一貫性を保つ(`WallStatusPanel`・`HomeWallPreview`・`JobForm`で共通)。
 - **ナビ・通知等のUIアイコン**: `AppDrawer`の各メニュー項目、`NotificationToggle`のベルアイコンなど。通知トグルはアイコンのみ表示し、ラベルは`title`属性のホバーツールチップに任せる(常時テキストを出さない)。
 
+## /aboutページの構成パターン
+
+`src/app/about/page.tsx` は「できること」「開発ストーリー」「計算の根拠」の3つを同じledger行パターン(見出し＋`border-b-2`＋件数、各項目は`border-b border-(--gridline)`)で並べる。新しい説明セクションを追加するときもこの形式に合わせる。
+
+- **開発ストーリー**: before/afterのスクリーンショットを`public/story/`配下に置き、`STORY_ENTRIES`配列(title/body/before/after/objectPosition)から`<Image fill>`グリッドで表示する。**本物の過去バージョンのスクリーンショットを使う**(git worktreeで旧タグを別ポートで動かして撮影する。文章だけで済ませる手抜きはしない)。
+- **計算の根拠**: 壁の金額・年齢条件・通勤手当の扱いなど、ロジックの根拠をユーザー向け文章に書き直して`CALCULATION_BASIS`配列で列挙する。出典(日本年金機構など)がある場合は本文に明記する。`wallCalculator.ts`のコメントと数値を正としてズレないようにする。
+- **プライバシー説明ボックス**(`id="privacy"`): データがサーバーに送信されない旨の説明。ホーム画面のCTA付近から`/about#privacy`でこのブロックへ直接リンクできるようにしている(実装例: `src/app/page.tsx`の「🔒 データはサーバーに送信されません」リンク)。
+
 ## 操作の安全性・タップ領域
 
 - **破壊的な操作(削除)には確認を挟む**: ワンクリックで即削除せず、「削除」→「削除する？[削除する][キャンセル]」の2段階にする。ネイティブの`confirm()`は使わない(デザインが統一できない・自動テストでフリーズするリスクがあるため)。実装例: `JobForm.tsx`, `GoalPlanner.tsx` の `GoalCard`。

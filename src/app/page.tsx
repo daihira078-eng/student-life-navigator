@@ -40,12 +40,20 @@ export default function Home() {
               </Link>
               <span className="text-xs text-muted">登録不要・ずっと無料</span>
             </div>
-            <Link
-              href="/about"
-              className="text-sm font-medium text-secondary underline decoration-(--border-hairline) underline-offset-4 hover:text-brand"
-            >
-              このツールについて
-            </Link>
+            <div className="flex flex-wrap items-center gap-4">
+              <Link
+                href="/about"
+                className="text-sm font-medium text-secondary underline decoration-(--border-hairline) underline-offset-4 hover:text-brand"
+              >
+                このツールについて
+              </Link>
+              <Link
+                href="/about#privacy"
+                className="text-xs text-muted underline decoration-(--border-hairline) underline-offset-4 hover:text-brand"
+              >
+                🔒 データはサーバーに送信されません
+              </Link>
+            </div>
           </div>
           <HomeWallPreview />
         </div>
