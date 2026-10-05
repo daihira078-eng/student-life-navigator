@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { JobForm } from "@/components/simulator/JobForm";
-import { ProfileForm } from "@/components/simulator/ProfileForm";
+import { ProfileOnboarding } from "@/components/simulator/ProfileOnboarding";
+import { ProfileSettingsModal } from "@/components/simulator/ProfileSettingsModal";
 import { WallStatusPanel } from "@/components/simulator/WallStatusPanel";
 import { IncomeChart, type IncomeSeries } from "@/components/simulator/IncomeChart";
 import { ScenarioForm } from "@/components/simulator/ScenarioForm";
@@ -18,6 +19,7 @@ import { GoalPlanner } from "@/components/simulator/GoalPlanner";
 import { ShiftCalendar } from "@/components/simulator/ShiftCalendar";
 import { ScheduleDriftNotice } from "@/components/simulator/ScheduleDriftNotice";
 import { RiskToleranceNotice } from "@/components/simulator/RiskToleranceNotice";
+import { SettingsIcon } from "@/components/icons";
 import { cumulativeByMonth, evaluateWalls, getWalls } from "@/lib/wallCalculator";
 import { useLocalStorageState } from "@/lib/useLocalStorageState";
 import { ACTUAL_INCOME_2026, type ActualIncomeRecord } from "@/lib/actualIncomeData";
@@ -61,6 +63,11 @@ export default function SimulatorPage() {
     ACTUAL_INCOME_2026,
   );
   const [notificationsEnabled] = useLocalStorageState<boolean>("simulator:notificationsEnabled", false);
+  const [onboardingComplete, setOnboardingComplete] = useLocalStorageState<boolean>(
+    "simulator:onboardingComplete",
+    false,
+  );
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const walls = useMemo(() => evaluateWalls(jobs, profile), [jobs, profile]);
   const series: IncomeSeries[] = useMemo(
@@ -139,6 +146,7 @@ export default function SimulatorPage() {
     setProfile(data.profile);
     setExtraScenarios(data.extraScenarios);
     setActualIncome(data.actualIncome);
+    setOnboardingComplete(true);
   }
 
   return (
@@ -150,27 +158,43 @@ export default function SimulatorPage() {
             ← トップに戻る
           </Link>
           <div className="flex items-center gap-3">
-            <NotificationToggle />
-            <span aria-hidden className="text-xs text-muted">
-              /
-            </span>
-            <DataPortability
-              jobs={jobs}
-              profile={profile}
-              extraScenarios={extraScenarios}
-              actualIncome={actualIncome}
-              onImport={handleImport}
-            />
-            <span aria-hidden className="text-xs text-muted">
-              /
-            </span>
-            <button
-              type="button"
-              onClick={resetToDefaults}
-              className="text-xs text-muted hover:text-status-critical"
-            >
-              入力を初期値に戻す
-            </button>
+            {onboardingComplete && (
+              <>
+                <NotificationToggle />
+                <span aria-hidden className="text-xs text-muted">
+                  /
+                </span>
+                <DataPortability
+                  jobs={jobs}
+                  profile={profile}
+                  extraScenarios={extraScenarios}
+                  actualIncome={actualIncome}
+                  onImport={handleImport}
+                />
+                <span aria-hidden className="text-xs text-muted">
+                  /
+                </span>
+                <button
+                  type="button"
+                  onClick={resetToDefaults}
+                  className="text-xs text-muted hover:text-status-critical"
+                >
+                  入力を初期値に戻す
+                </button>
+                <span aria-hidden className="text-xs text-muted">
+                  /
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSettingsOpen(true)}
+                  aria-label="プロフィール設定を開く"
+                  title="プロフィール設定"
+                  className="flex h-6 w-6 items-center justify-center rounded text-muted outline-none hover:text-brand focus-visible:ring-2 focus-visible:ring-brand"
+                >
+                  <SettingsIcon className="h-4 w-4" />
+                </button>
+              </>
+            )}
           </div>
         </div>
         <h1 className="mt-2 text-2xl font-semibold text-primary">
@@ -181,94 +205,112 @@ export default function SimulatorPage() {
         </p>
       </div>
 
-      <PageTabs tabs={PAGE_TABS} active={pageTab} onChange={setPageTab} />
+      <ProfileSettingsModal
+        open={settingsOpen}
+        profile={profile}
+        onChange={setProfile}
+        onClose={() => setSettingsOpen(false)}
+      />
 
-      {pageTab === "status" && (
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-          {/* モバイルでは結果(壁ステータス)を先に見せ、入力フォームのスクロールを強いない */}
-          <div className="order-2 flex flex-col gap-4 lg:order-1">
-            <ProfileForm profile={profile} onChange={setProfile} />
-            <RiskToleranceNotice profile={profile} walls={walls} actualIncome={actualIncome} onChange={setProfile} />
-            <ScheduleDriftNotice jobs={jobs} onChange={setJobs} />
-            <JobForm jobs={jobs} onChange={setJobs} />
-          </div>
-          <div className="order-1 flex flex-col gap-4 lg:order-2">
-            <WallStatusPanel walls={walls} jobs={jobs} />
-          </div>
-        </div>
-      )}
+      {!onboardingComplete ? (
+        <ProfileOnboarding
+          initialProfile={profile}
+          onComplete={(p) => {
+            setProfile(p);
+            setOnboardingComplete(true);
+          }}
+        />
+      ) : (
+        <>
+          <PageTabs tabs={PAGE_TABS} active={pageTab} onChange={setPageTab} />
 
-      {pageTab === "goal" && <GoalPlanner jobs={jobs} walls={walls} actualIncome={actualIncome} />}
-
-      {pageTab === "trend" && (
-        <IncomeChart series={series} walls={walls} targetYear={profile.targetYear} />
-      )}
-
-      {pageTab === "calendar" && <ShiftCalendar jobs={jobs} walls={wallOptions} year={profile.targetYear} />}
-
-      {pageTab === "scenario" && (
-        <div>
-          <div className="mb-3 flex items-center justify-between">
-            <p className="text-sm text-secondary">
-              「バイトを1つ増やしたら」「今のバイトを辞めたら」を現状と並べて比較できます。
-            </p>
-            <button
-              type="button"
-              onClick={addScenario}
-              className="shrink-0 rounded border border-dashed border-series-2 px-3 py-1.5 text-sm text-series-2 hover:opacity-80"
-            >
-              + 比較シナリオを追加
-            </button>
-          </div>
-
-          {extraScenarios.length === 0 ? (
-            <p className="text-sm text-secondary">上のボタンから追加してください。</p>
-          ) : (
-            <div className="flex flex-col gap-4">
-              {extraScenarios.map((scenario) => (
-                <ScenarioForm
-                  key={scenario.id}
-                  scenario={scenario}
-                  onChange={(next) => updateScenario(scenario.id, next)}
-                  onRemove={() => removeScenario(scenario.id)}
-                />
-              ))}
-
-              {wallOptions.length > 1 && (
-                <label className="flex items-center gap-2 text-sm text-secondary">
-                  比較する壁
-                  <select
-                    value={activeComparisonWallKey}
-                    onChange={(e) =>
-                      setComparisonWallKey(e.target.value as "incomeTax" | "socialInsurance")
-                    }
-                    className="rounded border border-(--border-hairline) bg-transparent px-2 py-1 text-primary"
-                  >
-                    {wallOptions.map((w) => (
-                      <option key={w.key} value={w.key}>
-                        {w.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
-
-              <ScenarioComparisonTable scenarios={allScenarios} profile={profile} />
-              <IncomeChart
-                series={comparisonSeries}
-                walls={comparisonWalls}
-                targetYear={profile.targetYear}
-              />
+          {pageTab === "status" && (
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+              {/* モバイルでは結果(壁ステータス)を先に見せ、入力フォームのスクロールを強いない */}
+              <div className="order-2 flex flex-col gap-4 lg:order-1">
+                <RiskToleranceNotice profile={profile} walls={walls} actualIncome={actualIncome} onChange={setProfile} />
+                <ScheduleDriftNotice jobs={jobs} onChange={setJobs} />
+                <JobForm jobs={jobs} onChange={setJobs} />
+              </div>
+              <div className="order-1 flex flex-col gap-4 lg:order-2">
+                <WallStatusPanel walls={walls} jobs={jobs} />
+              </div>
             </div>
           )}
-        </div>
-      )}
 
-      {pageTab === "actual" && (
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-          <ActualIncomeForm records={actualIncome} onChange={setActualIncome} />
-          <ActualComparisonChart jobs={jobs} actualIncome={actualIncome} />
-        </div>
+          {pageTab === "goal" && <GoalPlanner jobs={jobs} walls={walls} actualIncome={actualIncome} />}
+
+          {pageTab === "trend" && (
+            <IncomeChart series={series} walls={walls} targetYear={profile.targetYear} />
+          )}
+
+          {pageTab === "calendar" && <ShiftCalendar jobs={jobs} walls={wallOptions} year={profile.targetYear} />}
+
+          {pageTab === "scenario" && (
+            <div>
+              <div className="mb-3 flex items-center justify-between">
+                <p className="text-sm text-secondary">
+                  「バイトを1つ増やしたら」「今のバイトを辞めたら」を現状と並べて比較できます。
+                </p>
+                <button
+                  type="button"
+                  onClick={addScenario}
+                  className="shrink-0 rounded border border-dashed border-series-2 px-3 py-1.5 text-sm text-series-2 hover:opacity-80"
+                >
+                  + 比較シナリオを追加
+                </button>
+              </div>
+
+              {extraScenarios.length === 0 ? (
+                <p className="text-sm text-secondary">上のボタンから追加してください。</p>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  {extraScenarios.map((scenario) => (
+                    <ScenarioForm
+                      key={scenario.id}
+                      scenario={scenario}
+                      onChange={(next) => updateScenario(scenario.id, next)}
+                      onRemove={() => removeScenario(scenario.id)}
+                    />
+                  ))}
+
+                  {wallOptions.length > 1 && (
+                    <label className="flex items-center gap-2 text-sm text-secondary">
+                      比較する壁
+                      <select
+                        value={activeComparisonWallKey}
+                        onChange={(e) =>
+                          setComparisonWallKey(e.target.value as "incomeTax" | "socialInsurance")
+                        }
+                        className="rounded border border-(--border-hairline) bg-transparent px-2 py-1 text-primary"
+                      >
+                        {wallOptions.map((w) => (
+                          <option key={w.key} value={w.key}>
+                            {w.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
+
+                  <ScenarioComparisonTable scenarios={allScenarios} profile={profile} />
+                  <IncomeChart
+                    series={comparisonSeries}
+                    walls={comparisonWalls}
+                    targetYear={profile.targetYear}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {pageTab === "actual" && (
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+              <ActualIncomeForm records={actualIncome} onChange={setActualIncome} />
+              <ActualComparisonChart jobs={jobs} actualIncome={actualIncome} />
+            </div>
+          )}
+        </>
       )}
     </main>
   );
