@@ -15,6 +15,7 @@ interface GoalPlannerProps {
 }
 
 const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1);
+const GENERIC_NAME_EXAMPLES = ["旅行資金", "貯金", "生活費の足し"];
 
 function newGoal(): Goal {
   return { id: `goal-${crypto.randomUUID()}`, name: "目標", amount: 50000, targetMonth: null };
@@ -24,6 +25,12 @@ export function GoalPlanner({ jobs, walls, actualIncome }: GoalPlannerProps) {
   const [goals, setGoals] = useLocalStorageState<Goal[]>("simulator:goals", [newGoal()]);
 
   const progress = walls.map((w) => computeWallProgress(jobs, w.wall, actualIncome));
+
+  // 本人が過去につけた目標名(初期値の"目標"・空文字・重複は除く)。これまでの自分の
+  // 傾向から候補を出す方が、誰にでも同じ汎用例を出すよりパーソナルになるため。
+  const pastNames = Array.from(
+    new Set(goals.map((g) => g.name.trim()).filter((n) => n !== "" && n !== "目標")),
+  );
 
   function updateGoal(id: string, patch: Partial<Goal>) {
     setGoals((prev) => prev.map((g) => (g.id === id ? { ...g, ...patch } : g)));
@@ -72,6 +79,7 @@ export function GoalPlanner({ jobs, walls, actualIncome }: GoalPlannerProps) {
             jobs={jobs}
             walls={walls}
             actualIncome={actualIncome}
+            nameSuggestions={pastNames.filter((n) => n !== goal.name.trim())}
             onChange={(patch) => updateGoal(goal.id, patch)}
             onRemove={goals.length > 1 ? () => removeGoal(goal.id) : undefined}
           />
@@ -96,11 +104,12 @@ interface GoalCardProps {
   jobs: Job[];
   walls: WallStatus[];
   actualIncome: ActualIncomeRecord[];
+  nameSuggestions: string[];
   onChange: (patch: Partial<Goal>) => void;
   onRemove?: () => void;
 }
 
-function GoalCard({ goal, jobs, walls, actualIncome, onChange, onRemove }: GoalCardProps) {
+function GoalCard({ goal, jobs, walls, actualIncome, nameSuggestions, onChange, onRemove }: GoalCardProps) {
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [exiting, setExiting] = useState(false);
   const plan = planGoal(jobs, walls, goal.amount, actualIncome, goal.targetMonth);
@@ -155,6 +164,19 @@ function GoalCard({ goal, jobs, walls, actualIncome, onChange, onRemove }: GoalC
               削除
             </button>
           ))}
+      </div>
+
+      <div className="mb-3 flex flex-wrap items-center gap-1.5">
+        {(nameSuggestions.length > 0 ? nameSuggestions : GENERIC_NAME_EXAMPLES).map((name) => (
+          <button
+            key={name}
+            type="button"
+            onClick={() => onChange({ name })}
+            className="rounded-full border border-(--border-hairline) px-2.5 py-1 text-xs text-secondary outline-none hover:border-series-1 hover:text-primary focus-visible:ring-2 focus-visible:ring-brand"
+          >
+            {name}
+          </button>
+        ))}
       </div>
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">

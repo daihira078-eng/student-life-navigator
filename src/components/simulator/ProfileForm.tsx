@@ -12,8 +12,15 @@ interface ProfileFormProps {
 const currentYear = new Date().getFullYear();
 const YEAR_OPTIONS = [currentYear - 1, currentYear, currentYear + 1, currentYear + 2];
 
+const WARNING_RATIO_OPTIONS: { value: number; label: string; description: string }[] = [
+  { value: 0.8, label: "堅実派", description: "壁の80%で注意表示" },
+  { value: 0.9, label: "標準", description: "壁の90%で注意表示" },
+  { value: 0.95, label: "攻める派", description: "壁の95%で注意表示" },
+];
+
 export function ProfileForm({ profile, onChange }: ProfileFormProps) {
   const isSpecificDependent = isSpecificDependentAge(profile.currentAge);
+  const warningRatio = profile.warningRatio ?? 0.9;
 
   return (
     <div className="rounded-lg border border-(--border-hairline) bg-surface p-4">
@@ -60,6 +67,30 @@ export function ProfileForm({ profile, onChange }: ProfileFormProps) {
             }
           />
         </label>
+        <div className="border-t border-(--gridline) pt-3">
+          <span className="text-secondary">壁への注意表示の出し方</span>
+          <div className="mt-2 flex gap-1.5">
+            {WARNING_RATIO_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                title={opt.description}
+                onClick={() => onChange({ ...profile, warningRatio: opt.value })}
+                className={`flex-1 rounded-md border px-2 py-1.5 text-xs font-medium outline-none focus-visible:ring-2 focus-visible:ring-brand ${
+                  warningRatio === opt.value
+                    ? "border-brand bg-(--brand-soft) text-brand"
+                    : "border-(--border-hairline) text-secondary hover:border-series-1"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <p className="mt-1.5 text-xs text-muted">
+            {WARNING_RATIO_OPTIONS.find((o) => o.value === warningRatio)?.description}
+            。ひとことアドバイスや通知が出るタイミングもこの設定に連動します。
+          </p>
+        </div>
       </div>
     </div>
   );

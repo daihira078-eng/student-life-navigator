@@ -24,6 +24,8 @@ export interface DependencyProfile {
   currentAge: number; // 現在の年齢。19〜23歳なら特定扶養控除の対象と自動判定
   socialInsuranceDependent: boolean; // 社会保険上の扶養に入っているか
   targetYear: number; // シミュレーション対象年度（表示用ラベル。税制・社保の閾値は現行法のまま固定）
+  // 壁の何%に達したら「warning」表示にするか(0.8=堅実派〜0.95=攻める派)。未指定時は0.9(標準)
+  warningRatio?: number;
 }
 
 export interface WallDefinition {

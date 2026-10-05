@@ -124,9 +124,9 @@ function monthReached(cumulative: number[], threshold: number): number | null {
   return index === -1 ? null : index + 1;
 }
 
-function statusOf(annualProjection: number, threshold: number): WallStatus["status"] {
+function statusOf(annualProjection: number, threshold: number, warningRatio: number): WallStatus["status"] {
   if (annualProjection >= threshold) return "critical";
-  if (annualProjection >= threshold * 0.9) return "warning";
+  if (annualProjection >= threshold * warningRatio) return "warning";
   return "good";
 }
 
@@ -222,6 +222,7 @@ function suggestShiftReduction(
 export function evaluateWalls(jobs: Job[], profile: DependencyProfile): WallStatus[] {
   const avgWage = weightedAverageWage(jobs);
   const walls = getWalls(profile);
+  const warningRatio = profile.warningRatio ?? 0.9;
 
   return walls.map((wall) => {
     const cumulative = cumulativeByMonth(jobs, wall.key);
@@ -235,7 +236,7 @@ export function evaluateWalls(jobs: Job[], profile: DependencyProfile): WallStat
       remainingAmount,
       remainingHours,
       monthReached: monthReached(cumulative, wall.threshold),
-      status: statusOf(annualProjection, wall.threshold),
+      status: statusOf(annualProjection, wall.threshold, warningRatio),
       excessImpact: estimateExcessImpact(wall, annualProjection, jobs),
       shiftSuggestion: suggestShiftReduction(jobs, excess, wall.key),
       breakdown: jobBreakdownForWall(jobs, wall.key),
