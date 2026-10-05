@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import type { WallStatus } from "@/lib/types";
+import type { Job, WallStatus } from "@/lib/types";
 import { formatHours, formatYen } from "@/lib/format";
 import { generateAdvice } from "@/lib/adviceGenerator";
-import { JOB_SEGMENT_COLORS } from "@/lib/jobColors";
+import { buildJobColorMapFromJobs } from "@/lib/jobColors";
 import { useAnimatedNumber } from "@/lib/useAnimatedNumber";
 import { AnimatedRing } from "./AnimatedRing";
 
@@ -18,19 +18,6 @@ const STATUS_COLOR: Record<WallStatus["status"], string> = {
   warning: "var(--status-warning)",
   critical: "var(--status-critical)",
 };
-
-/** リングのセグメント色。バイトの登場順で固定して、複数の壁をまたいでも同じバイトは同じ色になるようにする */
-function buildJobColorMap(walls: WallStatus[]): Map<string, string> {
-  const map = new Map<string, string>();
-  for (const w of walls) {
-    for (const c of w.breakdown) {
-      if (!map.has(c.jobId)) {
-        map.set(c.jobId, JOB_SEGMENT_COLORS[map.size % JOB_SEGMENT_COLORS.length]);
-      }
-    }
-  }
-  return map;
-}
 
 const STATUS_LABEL: Record<WallStatus["status"], string> = {
   good: "余裕あり",
@@ -84,7 +71,7 @@ function KpiCell({
   );
 }
 
-export function WallStatusPanel({ walls }: { walls: WallStatus[] }) {
+export function WallStatusPanel({ walls, jobs }: { walls: WallStatus[]; jobs: Job[] }) {
   if (walls.length === 0) {
     return (
       <div className="rounded-lg border border-(--border-hairline) bg-surface p-4 text-sm text-secondary">
@@ -93,7 +80,7 @@ export function WallStatusPanel({ walls }: { walls: WallStatus[] }) {
     );
   }
 
-  const jobColors = buildJobColorMap(walls);
+  const jobColors = buildJobColorMapFromJobs(jobs);
   const advice = generateAdvice(walls);
 
   const cells = walls.flatMap((w) => [

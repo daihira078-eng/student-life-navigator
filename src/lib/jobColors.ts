@@ -11,6 +11,8 @@ export const JOB_SEGMENT_COLORS = [
 
 export function buildJobColorMapFromJobs(jobs: Job[]): Map<string, string> {
   const map = new Map<string, string>();
-  jobs.forEach((job, i) => map.set(job.id, JOB_SEGMENT_COLORS[i % JOB_SEGMENT_COLORS.length]));
+  jobs.forEach((job, i) =>
+    map.set(job.id, job.color ?? JOB_SEGMENT_COLORS[i % JOB_SEGMENT_COLORS.length]),
+  );
   return map;
 }

@@ -191,7 +191,7 @@ export default function SimulatorPage() {
             <JobForm jobs={jobs} onChange={setJobs} />
           </div>
           <div className="order-1 flex flex-col gap-4 lg:order-2">
-            <WallStatusPanel walls={walls} />
+            <WallStatusPanel walls={walls} jobs={jobs} />
           </div>
         </div>
       )}

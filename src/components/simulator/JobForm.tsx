@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Job } from "@/lib/types";
 import { selectOnFocus } from "@/lib/selectOnFocus";
+import { getJobIcon, JOB_ICON_OPTIONS } from "@/components/icons";
+import { buildJobColorMapFromJobs, JOB_SEGMENT_COLORS } from "@/lib/jobColors";
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
@@ -35,6 +37,19 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
   const [exitingId, setExitingId] = useState<string | null>(null);
+  const [pickerOpenId, setPickerOpenId] = useState<string | null>(null);
+  const pickerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!pickerOpenId) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        setPickerOpenId(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [pickerOpenId]);
 
   function updateJob(id: string, patch: Partial<Job>) {
     onChange(jobs.map((job) => (job.id === id ? { ...job, ...patch } : job)));
@@ -73,6 +88,8 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
     });
   }
 
+  const jobColors = buildJobColorMapFromJobs(jobs);
+
   return (
     <div className="flex flex-col">
       <div className="mb-1 flex items-baseline justify-between border-b-2 border-(--text-primary) pb-2.5">
@@ -80,6 +97,7 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
         <span className="text-[11px] text-muted">{jobs.length}件</span>
       </div>
       {jobs.map((job, index) => {
+        const color = jobColors.get(job.id) ?? "var(--gridline)";
         const expanded = expandedIds.has(job.id);
         const confirmingDelete = confirmingDeleteId === job.id;
         const exiting = exitingId === job.id;
@@ -91,13 +109,70 @@ export function JobForm({ jobs, onChange }: JobFormProps) {
             }`}
           >
             <div className="mb-3 flex items-center justify-between gap-2">
-              <input
-                type="text"
-                value={job.name}
-                onChange={(e) => updateJob(job.id, { name: e.target.value })}
-                placeholder={`バイト${index + 1}`}
-                className="min-w-0 flex-1 rounded border border-transparent bg-transparent px-1 py-0.5 text-sm font-semibold text-primary outline-none hover:border-(--border-hairline) focus:border-series-1 focus-visible:ring-2 focus-visible:ring-brand"
-              />
+              <div className="flex min-w-0 flex-1 items-center gap-2">
+                <div className="relative shrink-0" ref={pickerOpenId === job.id ? pickerRef : undefined}>
+                  <button
+                    type="button"
+                    onClick={() => setPickerOpenId((id) => (id === job.id ? null : job.id))}
+                    aria-label="アイコンを選ぶ"
+                    aria-expanded={pickerOpenId === job.id}
+                    style={{
+                      background: `color-mix(in oklab, ${color} 16%, transparent)`,
+                      color,
+                    }}
+                    className="flex h-10 w-10 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                  >
+                    {(() => {
+                      const Icon = getJobIcon(job.icon);
+                      return <Icon className="h-4.5 w-4.5" />;
+                    })()}
+                  </button>
+                  {pickerOpenId === job.id && (
+                    <div className="absolute top-11 left-0 z-10 flex flex-col gap-2 border border-(--border-hairline) bg-surface p-1.5 shadow-sm">
+                      <div className="flex gap-1">
+                        {JOB_ICON_OPTIONS.map(({ key, label, Icon }) => (
+                          <button
+                            key={key}
+                            type="button"
+                            onClick={() => updateJob(job.id, { icon: key })}
+                            aria-label={label}
+                            title={label}
+                            className={`flex h-9 w-9 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-brand ${
+                              job.icon === key
+                                ? "bg-brand text-white"
+                                : "text-secondary hover:bg-(--page-plane)"
+                            }`}
+                          >
+                            <Icon className="h-4 w-4" />
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex gap-1 border-t border-(--gridline) pt-2">
+                        {JOB_SEGMENT_COLORS.map((swatch) => (
+                          <button
+                            key={swatch}
+                            type="button"
+                            onClick={() => updateJob(job.id, { color: swatch })}
+                            aria-label={`色: ${swatch}`}
+                            aria-pressed={color === swatch}
+                            style={{ background: swatch }}
+                            className={`h-9 w-9 shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-brand ${
+                              color === swatch ? "ring-2 ring-(--text-primary) ring-offset-2 ring-offset-(--surface-1)" : ""
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <input
+                  type="text"
+                  value={job.name}
+                  onChange={(e) => updateJob(job.id, { name: e.target.value })}
+                  placeholder={`バイト${index + 1}`}
+                  className="min-w-0 flex-1 rounded border border-transparent bg-transparent px-1 py-0.5 text-sm font-semibold text-primary outline-none hover:border-(--border-hairline) focus:border-series-1 focus-visible:ring-2 focus-visible:ring-brand"
+                />
+              </div>
               {jobs.length > 1 &&
                 (confirmingDelete ? (
                   <span className="flex shrink-0 items-center gap-2 text-xs">

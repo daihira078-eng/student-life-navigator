@@ -49,7 +49,22 @@
 
 ## 3D・装飾表現
 
-3Dは機能には使わず、背景のアクセント程度に留める。ロゴのbox-shadow+リムライト(抑えた立体感)、ホームヒーロー背景のradial-gradientグロー(`src/app/page.tsx`)が今のところの到達点。WebGL/3Dライブラリ(Spline等)は導入しない。
+3Dは機能には使わず、背景のアクセント程度に留める。WebGL/3Dライブラリ(Spline等)は導入しない。単色のradial-gradientグローは「主張がない」と不評だったため廃止し、代わりに以下の2つを採用:
+
+- **`.grid-backdrop`**(`globals.css`): ブランド色を帯びたグリッド線を敷き、中央をradial-gradientマスクでフェードさせる。「カードが浮いて見える」背景として`HomeWallPreview`で使用。
+- **`.wall-card-shadow`**(`globals.css`): カード下にブランド色を帯びたアンビエントシャドウを落とす(`box-shadow`に`color-mix`でシアンを混ぜる)。黒一色の影より質感が出る。
+
+## ホームヒーロー
+
+2カラム構成(左=コピー、右=`HomeWallPreview`)。Figma Makeで生成したデザイン案の構成(見出し→リード文→CTA、右に製品プレビューカード＋浮きバッジ)を参考に、配色・コピーは実データ・自社トーンに合わせて書き直した。架空の利用者数(「12,000+ users」等)やダミーの操作デモ(スライダー等)は、実データが持つ説得力を削ぐため使わない。見出しは**必ず2行で収まるよう文言を調整する**(3行になる場合は文言を短くする。`<br/>`で明示的に改行し、2行目が長すぎて折り返さないか都度ブラウザで確認する)。
+
+## アイコンシステム
+
+`src/components/icons.tsx` に集約。ストロークベース(strokeWidth 1.8, round cap)で統一。
+
+- **バイトの業種アイコン**: `Job.icon`(`JobIconKey`)で選択式。`JobForm.tsx`のアイコンボタンをクリックすると、アイコン5種+色5種(`JOB_SEGMENT_COLORS`)を選べるポップオーバーが開く。閉じるボタンは置かず、**背景クリックで閉じる**(click-outside、`JobForm.tsx`の`pickerRef`+`mousedown`リスナー参照)。
+- **バイトの色**: `Job.color`で選択式。未指定時は登場順の自動割り当て(`buildJobColorMapFromJobs`、`src/lib/jobColors.ts`)にフォールバックする。色を選ぶ場所が増えるたびに、この自動割り当て関数を経由させて一貫性を保つ(`WallStatusPanel`・`HomeWallPreview`・`JobForm`で共通)。
+- **ナビ・通知等のUIアイコン**: `AppDrawer`の各メニュー項目、`NotificationToggle`のベルアイコンなど。通知トグルはアイコンのみ表示し、ラベルは`title`属性のホバーツールチップに任せる(常時テキストを出さない)。
 
 ## 操作の安全性・タップ領域
 

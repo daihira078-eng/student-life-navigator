@@ -10,6 +10,8 @@ export interface Job {
   // 0=日,1=月,...6=土。指定した場合、月ベースの平均計算(daysPerWeek)に加えて
   // 実際のカレンダー日付でのシフト日を積み上げた日単位の壁到達日計算にも使う
   weekdays?: number[];
+  icon?: string; // JobIconKey(src/components/icons.tsx)。未指定時は業種に関わらずデフォルトアイコン
+  color?: string; // CSS変数文字列(例: "var(--series-2)")。未指定時は登場順の自動割り当て
 }
 
 export interface Scenario {

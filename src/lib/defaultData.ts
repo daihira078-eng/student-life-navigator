@@ -14,6 +14,7 @@ export const DEFAULT_JOBS: Job[] = [
     startMonth: 4,
     endMonth: null,
     monthlyCommutingAllowance: 0,
+    icon: "cup",
   },
   {
     id: "job-vexum",
@@ -24,6 +25,7 @@ export const DEFAULT_JOBS: Job[] = [
     startMonth: 8,
     endMonth: null,
     monthlyCommutingAllowance: 0,
+    icon: "briefcase",
   },
 ];
 

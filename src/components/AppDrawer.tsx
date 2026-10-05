@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { CalendarIcon, GaugeIcon, HomeIcon, InfoIcon } from "@/components/icons";
 
 const NAV_ITEMS = [
-  { href: "/", label: "ホーム" },
-  { href: "/simulator", label: "扶養最適化シミュレーター" },
-  { href: "/shifts", label: "シフト実績" },
-  { href: "/about", label: "このツールについて" },
+  { href: "/", label: "ホーム", Icon: HomeIcon },
+  { href: "/simulator", label: "扶養最適化シミュレーター", Icon: GaugeIcon },
+  { href: "/shifts", label: "シフト実績", Icon: CalendarIcon },
+  { href: "/about", label: "このツールについて", Icon: InfoIcon },
 ];
 
 export function AppDrawer() {
@@ -73,8 +74,9 @@ export function AppDrawer() {
                 <Link
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className="block rounded-md px-3 py-2.5 text-sm text-primary outline-none hover:bg-(--brand-soft) focus-visible:ring-2 focus-visible:ring-brand"
+                  className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-primary outline-none hover:bg-(--brand-soft) focus-visible:ring-2 focus-visible:ring-brand"
                 >
+                  <item.Icon className="h-4.5 w-4.5 shrink-0 text-brand" />
                   {item.label}
                 </Link>
               </li>

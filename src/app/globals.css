@@ -168,6 +168,42 @@ body {
   animation: row-enter 280ms ease-out;
 }
 
+/* 見出し中のキーワードを、色を変えるのではなくマーカーで強調する(唐突な色変化を避ける) */
+.wall-highlight {
+  position: relative;
+  display: inline-block;
+}
+
+/* ホームの実データプレビューで、カードが浮いて見えるよう背後に敷く薄いグリッド */
+.grid-backdrop {
+  --grid-line-color: color-mix(in oklab, var(--brand) 45%, var(--gridline));
+  background-image:
+    linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px);
+  background-size: 28px 28px;
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 55%, transparent 100%);
+  mask-image: radial-gradient(ellipse at center, #000 55%, transparent 100%);
+}
+
+/* カードの下にブランド色を帯びたアンビエントな影を落とす */
+.wall-card-shadow {
+  box-shadow:
+    0 24px 48px -16px color-mix(in oklab, var(--brand) 45%, transparent),
+    0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.wall-highlight::after {
+  content: "";
+  position: absolute;
+  left: -0.06em;
+  right: -0.06em;
+  bottom: 0.02em;
+  height: 0.3em;
+  background: var(--brand);
+  opacity: 0.55;
+  z-index: -1;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
