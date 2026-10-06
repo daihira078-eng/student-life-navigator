@@ -11,6 +11,8 @@ interface ProfileFormProps {
 
 const currentYear = new Date().getFullYear();
 const YEAR_OPTIONS = [currentYear - 1, currentYear, currentYear + 1, currentYear + 2];
+const GRADUATION_YEAR_OPTIONS = [currentYear, currentYear + 1, currentYear + 2, currentYear + 3, currentYear + 4];
+const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1);
 
 const WARNING_RATIO_OPTIONS: { value: number; label: string; description: string }[] = [
   { value: 0.8, label: "堅実派", description: "壁の80%で注意表示" },
@@ -67,6 +69,44 @@ export function ProfileForm({ profile, onChange }: ProfileFormProps) {
             }
           />
         </label>
+        <div className="border-t border-(--gridline) pt-3">
+          <span className="text-secondary">卒業予定(任意)</span>
+          <div className="mt-2 flex items-center gap-2">
+            <select
+              value={profile.graduationYear ?? ""}
+              onChange={(e) =>
+                onChange({
+                  ...profile,
+                  graduationYear: e.target.value === "" ? null : Number(e.target.value),
+                  graduationMonth: e.target.value === "" ? null : (profile.graduationMonth ?? 3),
+                })
+              }
+              className="rounded border border-(--border-hairline) bg-transparent px-2 py-1 text-primary outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            >
+              <option value="">未定</option>
+              {GRADUATION_YEAR_OPTIONS.map((y) => (
+                <option key={y} value={y}>
+                  {y}年
+                </option>
+              ))}
+            </select>
+            <select
+              value={profile.graduationMonth ?? ""}
+              disabled={profile.graduationYear == null}
+              onChange={(e) => onChange({ ...profile, graduationMonth: Number(e.target.value) })}
+              className="rounded border border-(--border-hairline) bg-transparent px-2 py-1 text-primary outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:opacity-50"
+            >
+              {MONTH_OPTIONS.map((m) => (
+                <option key={m} value={m}>
+                  {m}月
+                </option>
+              ))}
+            </select>
+          </div>
+          <p className="mt-1.5 text-xs text-muted">
+            設定すると、「目標から逆算」タブの期限の選択肢に「卒業まで」が反映されます(シミュレーション対象年度中に卒業する場合のみ)。
+          </p>
+        </div>
         <div className="border-t border-(--gridline) pt-3">
           <span className="text-secondary">壁への注意表示の出し方</span>
           <div className="mt-2 flex gap-1.5">

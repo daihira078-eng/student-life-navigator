@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { Job, WallStatus } from "@/lib/types";
+import type { DependencyProfile, Job, WallStatus } from "@/lib/types";
 import type { ActualIncomeRecord } from "@/lib/actualIncomeData";
 import { computeWallProgress, estimateEarnings, planGoal, type Goal } from "@/lib/goalPlanner";
 import { formatHours, formatYen } from "@/lib/format";
@@ -12,6 +12,7 @@ interface GoalPlannerProps {
   jobs: Job[];
   walls: WallStatus[];
   actualIncome: ActualIncomeRecord[];
+  profile: DependencyProfile;
 }
 
 const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -21,8 +22,19 @@ function newGoal(): Goal {
   return { id: `goal-${crypto.randomUUID()}`, name: "目標", amount: 50000, targetMonth: null };
 }
 
-export function GoalPlanner({ jobs, walls, actualIncome }: GoalPlannerProps) {
+/** シミュレーション対象年度中に卒業する場合だけ、その月を「卒業まで」として使う */
+function graduationMonthInTargetYear(profile: DependencyProfile): number | null {
+  if (profile.graduationYear !== profile.targetYear) return null;
+  return profile.graduationMonth ?? null;
+}
+
+function monthOptionLabel(month: number, graduationMonth: number | null): string {
+  return month === graduationMonth ? `${month}月末まで（卒業予定）` : `${month}月末まで`;
+}
+
+export function GoalPlanner({ jobs, walls, actualIncome, profile }: GoalPlannerProps) {
   const [goals, setGoals] = useLocalStorageState<Goal[]>("simulator:goals", [newGoal()]);
+  const graduationMonth = graduationMonthInTargetYear(profile);
 
   const progress = walls.map((w) => computeWallProgress(jobs, w.wall, actualIncome));
 
@@ -80,6 +92,7 @@ export function GoalPlanner({ jobs, walls, actualIncome }: GoalPlannerProps) {
             walls={walls}
             actualIncome={actualIncome}
             nameSuggestions={pastNames.filter((n) => n !== goal.name.trim())}
+            graduationMonth={graduationMonth}
             onChange={(patch) => updateGoal(goal.id, patch)}
             onRemove={goals.length > 1 ? () => removeGoal(goal.id) : undefined}
           />
@@ -94,7 +107,7 @@ export function GoalPlanner({ jobs, walls, actualIncome }: GoalPlannerProps) {
         ＋ 目標を追加
       </button>
 
-      <ReverseEstimator jobs={jobs} />
+      <ReverseEstimator jobs={jobs} graduationMonth={graduationMonth} />
     </div>
   );
 }
@@ -105,11 +118,21 @@ interface GoalCardProps {
   walls: WallStatus[];
   actualIncome: ActualIncomeRecord[];
   nameSuggestions: string[];
+  graduationMonth: number | null;
   onChange: (patch: Partial<Goal>) => void;
   onRemove?: () => void;
 }
 
-function GoalCard({ goal, jobs, walls, actualIncome, nameSuggestions, onChange, onRemove }: GoalCardProps) {
+function GoalCard({
+  goal,
+  jobs,
+  walls,
+  actualIncome,
+  nameSuggestions,
+  graduationMonth,
+  onChange,
+  onRemove,
+}: GoalCardProps) {
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [exiting, setExiting] = useState(false);
   const plan = planGoal(jobs, walls, goal.amount, actualIncome, goal.targetMonth);
@@ -203,7 +226,7 @@ function GoalCard({ goal, jobs, walls, actualIncome, nameSuggestions, onChange, 
             <option value="">年内（12月末）</option>
             {MONTH_OPTIONS.map((m) => (
               <option key={m} value={m}>
-                {m}月末まで
+                {monthOptionLabel(m, graduationMonth)}
               </option>
             ))}
           </select>
@@ -280,7 +303,7 @@ function GoalCard({ goal, jobs, walls, actualIncome, nameSuggestions, onChange, 
   );
 }
 
-function ReverseEstimator({ jobs }: { jobs: Job[] }) {
+function ReverseEstimator({ jobs, graduationMonth }: { jobs: Job[]; graduationMonth: number | null }) {
   const [jobId, setJobId] = useState<string>(jobs[0]?.id ?? "");
   const [weeklyHours, setWeeklyHours] = useState<number>(2);
   const [targetMonth, setTargetMonth] = useState<number | null>(null);
@@ -337,7 +360,7 @@ function ReverseEstimator({ jobs }: { jobs: Job[] }) {
             <option value="">年内（12月末）</option>
             {MONTH_OPTIONS.map((m) => (
               <option key={m} value={m}>
-                {m}月末まで
+                {monthOptionLabel(m, graduationMonth)}
               </option>
             ))}
           </select>

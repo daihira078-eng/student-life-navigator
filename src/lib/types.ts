@@ -26,6 +26,9 @@ export interface DependencyProfile {
   targetYear: number; // シミュレーション対象年度（表示用ラベル。税制・社保の閾値は現行法のまま固定）
   // 壁の何%に達したら「warning」表示にするか(0.8=堅実派〜0.95=攻める派)。未指定時は0.9(標準)
   warningRatio?: number;
+  // 卒業予定年月(任意、未定ならnull)。GoalPlannerの期限選択に「卒業まで」を反映するために使う
+  graduationYear?: number | null;
+  graduationMonth?: number | null;
 }
 
 export interface WallDefinition {

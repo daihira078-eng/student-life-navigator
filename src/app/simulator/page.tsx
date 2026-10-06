@@ -238,7 +238,9 @@ export default function SimulatorPage() {
             </div>
           )}
 
-          {pageTab === "goal" && <GoalPlanner jobs={jobs} walls={walls} actualIncome={actualIncome} />}
+          {pageTab === "goal" && (
+            <GoalPlanner jobs={jobs} walls={walls} actualIncome={actualIncome} profile={profile} />
+          )}
 
           {pageTab === "trend" && (
             <IncomeChart series={series} walls={walls} targetYear={profile.targetYear} />
