@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { DependencyProfile } from "@/lib/types";
+import { WallIconMark } from "@/lib/pwaIcon";
 import { ProfileForm } from "./ProfileForm";
 
 interface ProfileOnboardingProps {
@@ -19,9 +20,19 @@ export function ProfileOnboarding({ initialProfile, onComplete }: ProfileOnboard
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5 py-6">
-      <div>
-        <h2 className="text-lg font-semibold text-primary">はじめに、あなたについて教えてください</h2>
-        <p className="mt-1.5 text-sm text-secondary">
+      <div className="flex flex-col gap-3">
+        <div
+          className="h-12 w-12 overflow-hidden rounded-xl"
+          style={{ boxShadow: "0 1px 0 var(--border-hairline)" }}
+        >
+          <WallIconMark size={48} />
+        </div>
+        <div className="flex items-center gap-2.5">
+          <span className="h-px w-6 bg-brand" />
+          <p className="text-xs font-bold tracking-[0.2em] text-brand uppercase">はじめに</p>
+        </div>
+        <h2 className="text-xl font-semibold text-primary">あなたについて教えてください</h2>
+        <p className="text-sm text-secondary">
           壁の金額や注意表示の基準の計算に使います。あとからいつでもヘッダーの設定アイコンから変更できます。
         </p>
       </div>
